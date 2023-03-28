@@ -1,9 +1,7 @@
-package rpc
+package main
 
 import (
 	"fmt"
-	"github.com/notional-labs/subnode/cmd"
-	"github.com/notional-labs/subnode/config"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -14,7 +12,7 @@ import (
 func StartRpcServer() {
 	hostProxy := make(map[string]*httputil.ReverseProxy)
 
-	cfg := cmd.GetConfig()
+	cfg := GetConfig()
 	for _, s := range cfg.Upstream {
 		target, err := url.Parse(s.Rpc)
 		if err != nil {
@@ -29,7 +27,7 @@ func StartRpcServer() {
 
 			fmt.Print("r.RequestURI=%s\n", r.RequestURI)
 
-			prunedNode := config.SelectPrunedNode(cfg)
+			prunedNode := SelectPrunedNode(cfg)
 			selectedHost := prunedNode.Rpc // default to pruned node
 
 			if strings.HasPrefix(r.RequestURI, "/abci_info") {
