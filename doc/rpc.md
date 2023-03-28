@@ -50,7 +50,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
     [ ] /status?
          route to pruned node
     [ ] /subscribe?query=_
-        not supported
+        not supported, use pruned node directly
     [ ] /tx?hash=_&prove=_
         not supported, should use indexer instead
     [ ] /tx_search?query=_&prove=_&page=_&per_page=_&order_by=_
@@ -58,9 +58,9 @@ https://docs.tendermint.com/v0.34/rpc/#/
     [ ] /unconfirmed_txs?limit=_
         route to pruned node
     [ ] /unsubscribe?query=_
-        not supported
+        not supported, use pruned node directly
     [ ] /unsubscribe_all?
-        not supported
+        not supported, use pruned node directly
     [ ] /validators?height=_&page=_&per_page=_
         base on height
 
