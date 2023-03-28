@@ -11,7 +11,7 @@ var (
 	configFile string
 )
 
-// NewRootCmd returns the root command for relayer.
+// NewRootCmd returns the root command
 func NewRootCmd() *cobra.Command {
 	// RootCmd represents the base command when called without any subcommands
 	var rootCmd = &cobra.Command{
@@ -20,7 +20,7 @@ func NewRootCmd() *cobra.Command {
 	}
 
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {
-		// reads `homeDir/config.yaml` into `var config *Config` before each command
+		// reads `subnode.yaml` into `var config *Config` before each command
 		// if err := initConfig(rootCmd); err != nil {
 		// 	return err
 		// }
