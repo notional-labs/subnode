@@ -58,3 +58,7 @@ func Execute() {
 		os.Exit(1)
 	}
 }
+
+func GetConfig() *config.Config {
+	return cfg
+}
