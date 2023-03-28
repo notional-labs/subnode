@@ -6,32 +6,48 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
 func StartRpcServer() {
 	hostProxy := make(map[string]*httputil.ReverseProxy)
 
-	cfg := GetConfig()
-	for _, s := range cfg.Upstream {
-		target, err := url.Parse(s.Rpc)
+	InitPool()
+
+	for _, s := range Pool {
+		target, err := url.Parse(s.Name)
 		if err != nil {
 			panic(err)
 		}
-		hostProxy[s.Rpc] = httputil.NewSingleHostReverseProxy(target)
+		hostProxy[s.Name] = httputil.NewSingleHostReverseProxy(target)
 	}
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			// see `/doc/rpc.md` to see the logic
 
-			fmt.Print("r.RequestURI=%s\n", r.RequestURI)
+			fmt.Printf("r.RequestURI=%s\n", r.RequestURI)
 
-			prunedNode := SelectPrunedNode(cfg)
-			selectedHost := prunedNode.Rpc // default to pruned node
+			prunedNode := SelectPrunedNode()
+			selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
 			if strings.HasPrefix(r.RequestURI, "/abci_info") {
-				selectedHost = prunedNode.Rpc
+				selectedHost = prunedNode.Backend.Rpc
+			} else if strings.HasPrefix(r.RequestURI, "/abci_query") {
+				// TODO: update node state of pruned node (last block height) and select suitable backend
+				height := r.URL.Query().Get("height")
+				if height != "" {
+					_, err := strconv.ParseInt(height, 10, 64)
+					if err == nil {
+						selectedHost = prunedNode.Backend.Rpc
+					} else {
+
+					}
+				} else {
+					selectedHost = prunedNode.Backend.Rpc
+				}
+
 			}
 
 			r.Host = r.URL.Host

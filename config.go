@@ -40,16 +40,6 @@ func GetBackendNodeType(b *Backend) BackendNodeType {
 	}
 }
 
-func SelectPrunedNode(cfg *Config) *Backend {
-	for _, s := range cfg.Upstream {
-		if GetBackendNodeType(&s) == BackendNodeTypePruned {
-			return &s
-		}
-	}
-
-	return nil
-}
-
 func LoadConfigFromFile(filename string) (*Config, error) {
 	buf, err := os.ReadFile(filename)
 	if err != nil {

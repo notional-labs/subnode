@@ -29,20 +29,3 @@ func TestGetBackendNodeType(t *testing.T) {
 
 	assert.Equal(t, GetBackendNodeType(&b), BackendNodeTypePruned)
 }
-
-func TestSelectPrunedNode(t *testing.T) {
-	pruned := Backend{
-		Rpc:    "http://pruned",
-		Blocks: []int{10},
-	}
-	archive := Backend{
-		Rpc:    "http://archive",
-		Blocks: []int{},
-	}
-
-	cfg := Config{
-		Upstream: []Backend{pruned, archive},
-	}
-
-	assert.Equal(t, SelectPrunedNode(&cfg).Rpc, pruned.Rpc)
-}
