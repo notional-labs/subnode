@@ -13,34 +13,10 @@ func NewRpcProxy(targetHost string) (*httputil.ReverseProxy, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("forwarding to -> %s\n", targetHost)
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
-
-	//originalDirector := proxy.Director
-	//proxy.Director = func(req *http.Request) {
-	//	originalDirector(req)
-	//	req.Header.Set("X-Proxy", "Simple-Reverse-Proxy")
-	//}
-
-	//proxy.ModifyResponse = modifyResponse()
-	//proxy.ErrorHandler = errorHandler()
-
 	return proxy, nil
 }
-
-//func errorHandler() func(http.ResponseWriter, *http.Request, error) {
-//	return func(w http.ResponseWriter, req *http.Request, err error) {
-//		fmt.Printf("Got error while modifying response: %v \n", err)
-//		return
-//	}
-//}
-
-//func modifyResponse() func(*http.Response) error {
-//	return func(resp *http.Response) error {
-//		return errors.New("response body is invalid")
-//	}
-//}
 
 // ProxyRequestHandler handles the http request using proxy
 func ProxyRequestHandler(proxy *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
