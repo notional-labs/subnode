@@ -1,0 +1,7 @@
+upstream:
+  - rpc: "http://rpc"
+    blocks: [50]
+  - rpc: "http://rpc2"
+    blocks: [100, 200]
+  - rpc: "http://rpc1"
+    blocks: [1, 100]

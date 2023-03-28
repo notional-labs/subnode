@@ -5,26 +5,12 @@ import (
 	"os"
 )
 
-/**
-
-[
-	{
-		rpc: "http://1.2.3.4.5:26656",
-		blocks: [-100000, 99999999]
-	},
-	{
-		rpc: "http://1.2.3.4.5:26656",
-		blocks: [1000000, 0]
-	},
-	{
-		rpc: "http://1.2.3.4.5:26656",
-		blocks: [0, 1000000]
-	}
-]
-*/
-
 type Backend struct {
-	Rpc    string
+	Rpc string
+
+	// examples:
+	// 	[1, 100] => from block 1 to block 100
+	// 	[10] => last 10 recent blocks
 	Blocks []int
 }
 
