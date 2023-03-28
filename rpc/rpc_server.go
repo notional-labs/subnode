@@ -7,35 +7,24 @@ import (
 	"net/url"
 )
 
-// NewRpcProxy takes target host and creates a reverse proxy
-func NewRpcProxy(targetHost string) (*httputil.ReverseProxy, error) {
-	target, err := url.Parse(targetHost)
+func StartRpcServer() {
+	target, err := url.Parse("https://rpc-osmosis-ia.cosmosia.notional.ventures:443")
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	proxy := httputil.NewSingleHostReverseProxy(target)
-	return proxy, nil
-}
 
-// ProxyRequestHandler handles the http request using proxy
-func ProxyRequestHandler(proxy *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+	handler := func(w http.ResponseWriter, r *http.Request) {
 		r.Host = r.URL.Host
 		proxy.ServeHTTP(w, r)
 	}
-}
-
-func StartRpcServer() {
-	// initialize a reverse proxy and pass the actual backend server url here
-	rpcProxy, err := NewRpcProxy("https://rpc-osmosis-ia.cosmosia.notional.ventures:443")
 
 	if err != nil {
 		panic(err)
 	}
 
 	// handle all requests to your server using the proxy
-	http.HandleFunc("/", ProxyRequestHandler(rpcProxy))
+	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
-	//log.Fatal(http.ListenAndServe(":8080", rpcProxy))
 }
