@@ -1,7 +1,6 @@
-package cmd
+package main
 
 import (
-	"github.com/notional-labs/subnode/rpc"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +10,7 @@ func startCmd() *cobra.Command {
 		Short: "start subnode server",
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			rpc.StartRpcServer()
+			StartRpcServer()
 			return nil
 		},
 	}
