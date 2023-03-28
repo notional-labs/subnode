@@ -1,14 +1,16 @@
 package cmd
 
 import (
-	"os"
-
+	"fmt"
+	"github.com/notional-labs/subnode/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"os"
 )
 
 var (
-	configFile string
+	cfg  *config.Config
+	conf string // path to config file
 )
 
 // NewRootCmd returns the root command
@@ -20,17 +22,19 @@ func NewRootCmd() *cobra.Command {
 	}
 
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {
-		// reads `subnode.yaml` into `var config *Config` before each command
-		// if err := initConfig(rootCmd); err != nil {
-		// 	return err
-		// }
+		cfg, err := config.LoadConfigFromFile(conf)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%+v\n", cfg)
 
 		return nil
 	}
 
-	// --app flag
-	rootCmd.PersistentFlags().StringVar(&configFile, "config-file", "subnode.yaml", "path to the config file")
-	if err := viper.BindPFlag("config-file", rootCmd.PersistentFlags().Lookup("config-file")); err != nil {
+	// --config flag
+	rootCmd.PersistentFlags().StringVar(&conf, "conf", "subnode.yaml", "path to the config file")
+	if err := viper.BindPFlag("conf", rootCmd.PersistentFlags().Lookup("conf")); err != nil {
 		panic(err)
 	}
 
