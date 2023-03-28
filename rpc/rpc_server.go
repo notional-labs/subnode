@@ -3,6 +3,7 @@ package rpc
 import (
 	"fmt"
 	"github.com/notional-labs/subnode/cmd"
+	"github.com/notional-labs/subnode/config"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -24,15 +25,19 @@ func StartRpcServer() {
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
+			// see `/doc/rpc.md` to see the logic
+
 			fmt.Print("r.RequestURI=%s\n", r.RequestURI)
 
-			// see `/doc/rpc.md`
-			if strings.HasPrefix(r.RequestURI, "/abci_info") {
+			prunedNode := config.SelectPrunedNode(cfg)
+			selectedHost := prunedNode.Rpc // default to pruned node
 
+			if strings.HasPrefix(r.RequestURI, "/abci_info") {
+				selectedHost = prunedNode.Rpc
 			}
 
 			r.Host = r.URL.Host
-			hostProxy[r.RequestURI].ServeHTTP(w, r)
+			hostProxy[selectedHost].ServeHTTP(w, r)
 		} else {
 			w.Header().Set("Content-Type", "text/html")
 			w.WriteHeader(http.StatusBadRequest)
