@@ -35,31 +35,38 @@ func StartRpcServer() {
 			if strings.HasPrefix(r.RequestURI, "/abci_info") {
 				selectedHost = prunedNode.Backend.Rpc
 			} else if strings.HasPrefix(r.RequestURI, "/abci_query") {
-				// TODO: update node state of pruned node (last block height) and select suitable backend
-				height := r.URL.Query().Get("height")
-				if height != "" {
-					_, err := strconv.ParseInt(height, 10, 64)
-					if err == nil {
-						selectedHost = prunedNode.Backend.Rpc
-					} else {
-
+				heightParam := r.URL.Query().Get("height")
+				if heightParam != "" {
+					height, err := strconv.ParseInt(heightParam, 10, 64)
+					if err != nil {
+						SendError(w)
 					}
+
+					node, err := SelectMatchedNode(height)
+					if err != nil {
+						SendError(w)
+					}
+
+					selectedHost = node.Backend.Rpc
 				} else {
 					selectedHost = prunedNode.Backend.Rpc
 				}
-
 			}
 
 			r.Host = r.URL.Host
 			hostProxy[selectedHost].ServeHTTP(w, r)
 		} else {
-			w.Header().Set("Content-Type", "text/html")
-			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte("Oops! Something was wrong"))
+			SendError(w)
 		}
 	}
 
 	// handle all requests to your server using the proxy
 	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func SendError(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write([]byte("Oops! Something was wrong"))
 }

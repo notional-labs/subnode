@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -55,6 +56,25 @@ func SelectPrunedNode() *BackendState {
 	return nil
 }
 
+func SelectMatchedNode(height int64) (*BackendState, error) {
+	for _, s := range Pool {
+		if s.NodeType == BackendNodeTypePruned {
+			earliestHeight := s.LastBlock - s.Backend.Blocks[0]
+			if height >= earliestHeight {
+				return s, nil
+			}
+		} else if s.NodeType == BackendNodeTypeSubNode {
+			if (height >= s.Backend.Blocks[0]) && (height <= s.Backend.Blocks[0]) {
+				return s, nil
+			}
+		} else if s.NodeType == BackendNodeTypeArchive {
+			return s, nil
+		}
+	}
+
+	return nil, errors.New("no node matched")
+}
+
 func TaskUpdateState() {
 	// call close(quit) to stop
 
@@ -64,11 +84,16 @@ func TaskUpdateState() {
 		for {
 			select {
 			case <-ticker.C:
-				// do stuff
 				for _, s := range Pool {
 					if s.NodeType == BackendNodeTypePruned {
 						fmt.Println(s.Name)
 
+						height, err := FetchHeightFromStatus(s.Backend.Rpc)
+						if err == nil {
+							s.LastBlock = height
+						} else {
+							fmt.Println("Err FetchHeightFromStatus", err)
+						}
 					}
 				}
 
@@ -103,7 +128,7 @@ func FetchHeightFromStatus(rpcUrl string) (int64, error) {
 		return 0, err
 	}
 
-	fmt.Printf("body=%s\n", string(body))
+	//fmt.Printf("body=%s\n", string(body))
 	height, err := ReadHeightFromStatusJson(body)
 	if err != nil {
 		return 0, err

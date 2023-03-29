@@ -12,7 +12,7 @@ type Backend struct {
 	// 	[1, 100] => from block 1 to block 100 (subnode)
 	// 	[10] => last 10 recent blocks
 	//	[] => archive node
-	Blocks []int
+	Blocks []int64
 }
 
 type Config struct {
