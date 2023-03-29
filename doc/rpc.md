@@ -9,11 +9,11 @@ https://docs.tendermint.com/v0.34/rpc/#/
         route to pruned node
     [x] /abci_query?path=_&data=_&height=_&prove=_
         base on height
-    [ ] /block?height=_
+    [x] /block?height=_
         base on height
     [ ] /block_by_hash?hash=_
         not supported, should use indexer instead
-    [ ] /block_results?height=_
+    [x] /block_results?height=_
         base on height
     [ ] /block_search?query=_&page=_&per_page=_&order_by=_
         not supported, should be used with indexer
