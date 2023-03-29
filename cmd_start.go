@@ -10,9 +10,10 @@ func startCmd() *cobra.Command {
 		Short: "start subnode server",
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			Init()
-			StartRpcServer()
-			StartApiServer()
+			//Init()
+			//StartRpcServer()
+			//StartApiServer()
+			StartGrpcServer()
 
 			select {}
 
