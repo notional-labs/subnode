@@ -23,6 +23,7 @@ type BackendState struct {
 var (
 	PoolRpc     []*BackendState
 	PoolApi     []*BackendState
+	PoolGrpc    []*BackendState
 	ProxyMapRpc = make(map[string]*httputil.ReverseProxy)
 	ProxyMapApi = make(map[string]*httputil.ReverseProxy)
 )
@@ -73,6 +74,16 @@ func InitPool() {
 		}
 		fmt.Printf("debug: %+v\n", backendStateApi)
 		PoolApi = append(PoolApi, &backendStateApi)
+
+		//
+		backendStateGrpc := BackendState{
+			Name:      s.Grpc,
+			NodeType:  GetBackendNodeType(&be),
+			LastBlock: 0,
+			Backend:   &be,
+		}
+		fmt.Printf("debug: %+v\n", backendStateGrpc)
+		PoolGrpc = append(PoolGrpc, &backendStateGrpc)
 	}
 
 	TaskUpdateState()
@@ -90,6 +101,16 @@ func SelectPrunedNodeRpc() *BackendState {
 
 func SelectPrunedNodeApi() *BackendState {
 	for _, s := range PoolApi {
+		if s.NodeType == BackendNodeTypePruned {
+			return s
+		}
+	}
+
+	return nil
+}
+
+func SelectPrunedNodeGrpc() *BackendState {
+	for _, s := range PoolGrpc {
 		if s.NodeType == BackendNodeTypePruned {
 			return s
 		}
@@ -138,6 +159,26 @@ func SelectMatchedNodeApi(height int64) (*BackendState, error) {
 	return nil, errors.New("no node matched")
 }
 
+func SelectMatchedNodeGrpc(height int64) (*BackendState, error) {
+	for _, s := range PoolGrpc {
+		fmt.Printf("debug: %+v\n", s)
+		if s.NodeType == BackendNodeTypePruned {
+			earliestHeight := s.LastBlock - s.Backend.Blocks[0]
+			if height >= earliestHeight {
+				return s, nil
+			}
+		} else if s.NodeType == BackendNodeTypeSubNode {
+			if (height >= s.Backend.Blocks[0]) && (height <= s.Backend.Blocks[0]) {
+				return s, nil
+			}
+		} else if s.NodeType == BackendNodeTypeArchive {
+			return s, nil
+		}
+	}
+
+	return nil, errors.New("no node matched")
+}
+
 func TaskUpdateState() {
 	// call close(quit) to stop
 
@@ -159,6 +200,17 @@ func TaskUpdateState() {
 				}
 
 				for _, s := range PoolApi {
+					if s.NodeType == BackendNodeTypePruned {
+						height, err := FetchHeightFromStatus(s.Backend.Rpc)
+						if err == nil {
+							s.LastBlock = height
+						} else {
+							fmt.Println("Err FetchHeightFromStatus", err)
+						}
+					}
+				}
+
+				for _, s := range PoolGrpc {
 					if s.NodeType == BackendNodeTypePruned {
 						height, err := FetchHeightFromStatus(s.Backend.Rpc)
 						if err == nil {
