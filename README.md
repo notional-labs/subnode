@@ -15,6 +15,44 @@ As data is spreaded over multiple sub-nodes, its required to have a proxy which 
 
 
 #### Supported Protocols
-- [Tendermint RPC/JSONRPC](doc/rpc.md)
-- LCD/API
-- GRPC.
+- [Tendermint RPC/JSONRPC](doc/rpc.md) on port 26657
+- LCD/API on port 1337
+- GRPC on port 9090
+
+
+
+#### Configuration
+See sample config [subnode.yaml](subnode.yaml).
+This sample includes 1 pruned node and 1 archive node.
+
+```yaml
+upstream:
+  - rpc: "https://rpc-osmosis-ia.cosmosia.notional.ventures:443"
+    api: "https://api-osmosis-ia.cosmosia.notional.ventures:443"
+    grpc: "grpc-osmosis-ia.cosmosia.notional.ventures:443"
+    blocks: [362880]
+  - rpc: "https://rpc-osmosis-archive-ia.cosmosia.notional.ventures:443"
+    api: "https://api-osmosis-archive-ia.cosmosia.notional.ventures:443"
+    grpc: "grpc-osmosis-archive-ia.cosmosia.notional.ventures:443"
+    blocks: []
+```
+
+`blocks` config example:
+- `[1, 100]` => from block 1 to block 100 (subnode)
+- `[10]` => last 10 recent blocks (for pruned node)
+- `[]` => for archive node
+
+Node on the top of the list has higher priority when selecting.
+
+
+### Usage
+install:
+```console
+make install
+```
+
+
+start:
+```console
+subnode start --conf=/path/to/config/file
+```
