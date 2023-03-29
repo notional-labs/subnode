@@ -55,7 +55,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
         not supported, should use indexer instead
     [ ] /tx_search?query=_&prove=_&page=_&per_page=_&order_by=_
         not supported, should use indexer instead
-    [ ] /unconfirmed_txs?limit=_
+    [x] /unconfirmed_txs?limit=_
         route to pruned node
     [ ] /unsubscribe?query=_
         not supported, use pruned node directly
