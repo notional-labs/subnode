@@ -12,7 +12,7 @@ type Backend struct {
 	// 	[1, 100] => from block 1 to block 100 (subnode)
 	// 	[10] => last 10 recent blocks
 	//	[] => archive node
-	Blocks []int
+	Blocks []int64
 }
 
 type Config struct {
@@ -38,16 +38,6 @@ func GetBackendNodeType(b *Backend) BackendNodeType {
 	default:
 		panic("invalid blocks config")
 	}
-}
-
-func SelectPrunedNode(cfg *Config) *Backend {
-	for _, s := range cfg.Upstream {
-		if GetBackendNodeType(&s) == BackendNodeTypePruned {
-			return &s
-		}
-	}
-
-	return nil
 }
 
 func LoadConfigFromFile(filename string) (*Config, error) {
