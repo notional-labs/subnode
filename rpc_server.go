@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -24,13 +27,13 @@ func StartRpcServer() {
 	}
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" {
+		prunedNode := SelectPrunedNode()
+		selectedHost := prunedNode.Backend.Rpc // default to pruned node
+
+		if r.Method == "GET" { // URI over HTTP
 			// see `/doc/rpc.md` to see the logic
 
 			fmt.Printf("r.RequestURI=%s\n", r.RequestURI)
-
-			prunedNode := SelectPrunedNode()
-			selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
 			if strings.HasPrefix(r.RequestURI, "/abci_info") ||
 				strings.HasPrefix(r.RequestURI, "/broadcast_") ||
@@ -72,6 +75,87 @@ func StartRpcServer() {
 				}
 			}
 
+			r.Host = r.URL.Host
+			hostProxy[selectedHost].ServeHTTP(w, r)
+		} else if r.Method == "POST" { // JSONRPC over HTTP
+			body, err := io.ReadAll(r.Body)
+			if err != nil {
+				SendError(w)
+			}
+
+			fmt.Printf("body=%s\n", string(body))
+
+			var j0 interface{}
+			err = json.Unmarshal(body, &j0)
+			if err != nil {
+				SendError(w)
+			}
+
+			m0 := j0.(map[string]interface{})
+			method := m0["method"].(string)
+			params := m0["params"].([]interface{})
+
+			fmt.Printf("method=%s, params=%+v\n", method, params)
+
+			if method == "abci_info" ||
+				strings.HasPrefix(method, "broadcast_") ||
+				method == "check_tx" ||
+				method == "consensus_state" ||
+				method == "dump_consensus_state" ||
+				method == "genesis" ||
+				method == "genesis_chunked" ||
+				method == "health" ||
+				method == "net_info" ||
+				method == "num_unconfirmed_txs" ||
+				method == "status" ||
+				method == "subscribe" ||
+				method == "unconfirmed_txs" ||
+				method == "unsubscribe" ||
+				method == "unsubscribe_all" {
+				selectedHost = prunedNode.Backend.Rpc
+			} else if method == "block" ||
+				method == "block_results" ||
+				method == "commit" ||
+				method == "consensus_params" ||
+				method == "validators" {
+
+				// height is 1st param
+				if len(params) < 1 {
+					SendError(w)
+				}
+
+				heightParam := params[0].(string)
+				height, err := strconv.ParseInt(heightParam, 10, 64)
+				if err != nil {
+					SendError(w)
+				}
+
+				node, err := SelectMatchedNode(height)
+				if err != nil {
+					SendError(w)
+				}
+
+				selectedHost = node.Backend.Rpc
+			} else if method == "abci_query" {
+				// height is 3rd param
+				if len(params) < 3 {
+					SendError(w)
+				}
+
+				heightParam := params[2].(string)
+				height, err := strconv.ParseInt(heightParam, 10, 64)
+				if err != nil {
+					SendError(w)
+				}
+
+				node, err := SelectMatchedNode(height)
+				if err != nil {
+					SendError(w)
+				}
+				selectedHost = node.Backend.Rpc
+			}
+
+			r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
 			r.Host = r.URL.Host
 			hostProxy[selectedHost].ServeHTTP(w, r)
 		} else {
