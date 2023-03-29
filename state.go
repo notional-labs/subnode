@@ -27,19 +27,15 @@ func InitPool() {
 
 	cfg := GetConfig()
 	for _, s := range cfg.Upstream {
-		//target, err := url.Parse(s.Rpc)
-		//if err != nil {
-		//	panic(err)
-		//}
-		//hostProxy[s.Rpc] = httputil.NewSingleHostReverseProxy(target)
+		be := s // fix Copying the address of a loop variable in Go
 
 		backendState := BackendState{
 			Name:      s.Rpc,
-			NodeType:  GetBackendNodeType(&s),
+			NodeType:  GetBackendNodeType(&be),
 			LastBlock: 0,
-			Backend:   &s,
+			Backend:   &be,
 		}
-
+		fmt.Printf("debug: %+v\n", backendState)
 		Pool = append(Pool, &backendState)
 	}
 
@@ -58,6 +54,7 @@ func SelectPrunedNode() *BackendState {
 
 func SelectMatchedNode(height int64) (*BackendState, error) {
 	for _, s := range Pool {
+		fmt.Printf("debug: %+v\n", s)
 		if s.NodeType == BackendNodeTypePruned {
 			earliestHeight := s.LastBlock - s.Backend.Blocks[0]
 			if height >= earliestHeight {
