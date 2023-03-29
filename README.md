@@ -13,3 +13,8 @@ Each subnode stores data of 5 millions blocks or 5 TB. Old subnodes are read-onl
 
 As data is spreaded over multiple sub-nodes, its required to have a proxy which aggreates data from sub-nodes and provides compatible rpc/api.
 
+
+#### Supported Protocols
+- [Tendermint RPC/JSONRPC](doc/rpc.md)
+- LCD/API
+- GRPC.
