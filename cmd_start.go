@@ -13,6 +13,9 @@ func startCmd() *cobra.Command {
 			Init()
 			StartRpcServer()
 			StartApiServer()
+
+			select {}
+
 			return nil
 		},
 	}

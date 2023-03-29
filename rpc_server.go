@@ -13,7 +13,7 @@ import (
 
 func StartRpcServer() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		prunedNode := SelectPrunedNode()
+		prunedNode := SelectPrunedNodeRpc()
 		selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
 		if r.Method == "GET" { // URI over HTTP
@@ -50,7 +50,7 @@ func StartRpcServer() {
 						SendError(w)
 					}
 
-					node, err := SelectMatchedNode(height)
+					node, err := SelectMatchedNodeRpc(height)
 					if err != nil {
 						SendError(w)
 					}
@@ -62,7 +62,7 @@ func StartRpcServer() {
 			}
 
 			r.Host = r.URL.Host
-			ProxyMap[selectedHost].ServeHTTP(w, r)
+			ProxyMapRpc[selectedHost].ServeHTTP(w, r)
 		} else if r.Method == "POST" { // JSONRPC over HTTP
 			body, err := io.ReadAll(r.Body)
 			if err != nil {
@@ -116,7 +116,7 @@ func StartRpcServer() {
 					SendError(w)
 				}
 
-				node, err := SelectMatchedNode(height)
+				node, err := SelectMatchedNodeRpc(height)
 				if err != nil {
 					SendError(w)
 				}
@@ -134,7 +134,7 @@ func StartRpcServer() {
 					SendError(w)
 				}
 
-				node, err := SelectMatchedNode(height)
+				node, err := SelectMatchedNodeRpc(height)
 				if err != nil {
 					SendError(w)
 				}
@@ -143,15 +143,19 @@ func StartRpcServer() {
 
 			r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
 			r.Host = r.URL.Host
-			ProxyMap[selectedHost].ServeHTTP(w, r)
+			ProxyMapRpc[selectedHost].ServeHTTP(w, r)
 		} else {
 			SendError(w)
 		}
 	}
 
 	// handle all requests to your server using the proxy
-	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":26657", nil))
+	//http.HandleFunc("/", handler)
+	serverMux := http.NewServeMux()
+	serverMux.HandleFunc("/", handler)
+	go func() {
+		log.Fatal(http.ListenAndServe(":26657", serverMux))
+	}()
 }
 
 func SendError(w http.ResponseWriter) {
