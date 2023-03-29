@@ -49,7 +49,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
          route to pruned node
     [x] /status?
          route to pruned node
-    [ ] /subscribe?query=_
+    [x] /subscribe?query=_
         not supported, use pruned node directly
     [ ] /tx?hash=_&prove=_
         not supported, should use indexer instead
