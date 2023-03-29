@@ -27,9 +27,9 @@ https://docs.tendermint.com/v0.34/rpc/#/
         route to pruned node
     [x] /broadcast_tx_sync?tx=_
         route to pruned node
-    [ ] /check_tx?tx=_
+    [x] /check_tx?tx=_
         route to pruned node
-    [ ] /commit?height=_
+    [x] /commit?height=_
         base on height
     [ ] /consensus_params?height=_
         base on height
