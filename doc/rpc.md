@@ -37,7 +37,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
          route to pruned node
     [x] /dump_consensus_state?
         route to pruned node
-    [ ] /genesis?
+    [x] /genesis?
         route to pruned node
     [ ] /genesis_chunked?chunk=_
         route to pruned node
