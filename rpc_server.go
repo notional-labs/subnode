@@ -165,7 +165,7 @@ func StartRpcServer() {
 
 	// handle all requests to your server using the proxy
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":26657", nil))
 }
 
 func SendError(w http.ResponseWriter) {
