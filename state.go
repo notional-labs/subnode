@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -19,8 +21,21 @@ type BackendState struct {
 }
 
 var (
-	Pool []*BackendState
+	Pool     []*BackendState
+	ProxyMap = make(map[string]*httputil.ReverseProxy)
 )
+
+func Init() {
+	InitPool()
+
+	for _, s := range Pool {
+		target, err := url.Parse(s.Name)
+		if err != nil {
+			panic(err)
+		}
+		ProxyMap[s.Name] = httputil.NewSingleHostReverseProxy(target)
+	}
+}
 
 func InitPool() {
 	Pool = Pool[:0] // Remove all elements
