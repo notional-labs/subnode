@@ -39,7 +39,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
         route to pruned node
     [x] /genesis?
         route to pruned node
-    [ ] /genesis_chunked?chunk=_
+    [x] /genesis_chunked?chunk=_
         route to pruned node
     [ ] /health?
         route to pruned node
