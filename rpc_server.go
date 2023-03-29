@@ -7,25 +7,11 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"strconv"
 	"strings"
 )
 
 func StartRpcServer() {
-	hostProxy := make(map[string]*httputil.ReverseProxy)
-
-	InitPool()
-
-	for _, s := range Pool {
-		target, err := url.Parse(s.Name)
-		if err != nil {
-			panic(err)
-		}
-		hostProxy[s.Name] = httputil.NewSingleHostReverseProxy(target)
-	}
-
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		prunedNode := SelectPrunedNode()
 		selectedHost := prunedNode.Backend.Rpc // default to pruned node
@@ -76,7 +62,7 @@ func StartRpcServer() {
 			}
 
 			r.Host = r.URL.Host
-			hostProxy[selectedHost].ServeHTTP(w, r)
+			ProxyMap[selectedHost].ServeHTTP(w, r)
 		} else if r.Method == "POST" { // JSONRPC over HTTP
 			body, err := io.ReadAll(r.Body)
 			if err != nil {
@@ -157,7 +143,7 @@ func StartRpcServer() {
 
 			r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
 			r.Host = r.URL.Host
-			hostProxy[selectedHost].ServeHTTP(w, r)
+			ProxyMap[selectedHost].ServeHTTP(w, r)
 		} else {
 			SendError(w)
 		}
@@ -165,7 +151,7 @@ func StartRpcServer() {
 
 	// handle all requests to your server using the proxy
 	http.HandleFunc("/", handler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":26657", nil))
 }
 
 func SendError(w http.ResponseWriter) {
