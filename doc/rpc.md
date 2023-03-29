@@ -45,7 +45,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
         route to pruned node
     [x] /net_info?
         route to pruned node
-    [ ] /num_unconfirmed_txs?
+    [x] /num_unconfirmed_txs?
          route to pruned node
     [ ] /status?
          route to pruned node
