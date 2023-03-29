@@ -35,7 +35,9 @@ func StartApiServer() {
 			r.Host = r.URL.Host
 			ProxyMapApi[selectedHost].ServeHTTP(w, r)
 		} else if r.Method == "POST" {
-
+			selectedHost = prunedNode.Backend.Api
+			r.Host = r.URL.Host
+			ProxyMapApi[selectedHost].ServeHTTP(w, r)
 		} else {
 			SendError(w)
 		}
