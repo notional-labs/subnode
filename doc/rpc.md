@@ -57,7 +57,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
         not supported, should use indexer instead
     [x] /unconfirmed_txs?limit=_
         route to pruned node
-    [ ] /unsubscribe?query=_
+    [x] /unsubscribe?query=_
         not supported, use pruned node directly
     [ ] /unsubscribe_all?
         not supported, use pruned node directly
