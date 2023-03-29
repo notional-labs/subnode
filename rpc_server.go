@@ -45,7 +45,8 @@ func StartRpcServer() {
 				strings.HasPrefix(r.RequestURI, "/status") ||
 				strings.HasPrefix(r.RequestURI, "/subscribe") ||
 				strings.HasPrefix(r.RequestURI, "/unconfirmed_txs") ||
-				strings.HasPrefix(r.RequestURI, "/unsubscribe") {
+				strings.HasPrefix(r.RequestURI, "/unsubscribe") ||
+				strings.HasPrefix(r.RequestURI, "/unsubscribe_all") {
 				selectedHost = prunedNode.Backend.Rpc
 			} else if strings.HasPrefix(r.RequestURI, "/abci_query") ||
 				strings.HasPrefix(r.RequestURI, "/block") ||
