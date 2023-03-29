@@ -33,9 +33,9 @@ https://docs.tendermint.com/v0.34/rpc/#/
         base on height
     [x] /consensus_params?height=_
         base on height
-    [ ] /consensus_state?
+    [x] /consensus_state?
          route to pruned node
-    [ ] /dump_consensus_state?
+    [x] /dump_consensus_state?
         route to pruned node
     [ ] /genesis?
         route to pruned node
