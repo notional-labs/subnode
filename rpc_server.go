@@ -34,7 +34,8 @@ func StartRpcServer() {
 
 			if strings.HasPrefix(r.RequestURI, "/abci_info") {
 				selectedHost = prunedNode.Backend.Rpc
-			} else if strings.HasPrefix(r.RequestURI, "/abci_query") {
+			} else if strings.HasPrefix(r.RequestURI, "/abci_query") ||
+				strings.HasPrefix(r.RequestURI, "/block") {
 				heightParam := r.URL.Query().Get("height")
 				if heightParam != "" {
 					height, err := strconv.ParseInt(heightParam, 10, 64)
