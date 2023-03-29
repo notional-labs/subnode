@@ -150,9 +150,11 @@ func StartRpcServer() {
 	}
 
 	// handle all requests to your server using the proxy
-	http.HandleFunc("/", handler)
+	//http.HandleFunc("/", handler)
+	serverMux := http.NewServeMux()
+	serverMux.HandleFunc("/", handler)
 	go func() {
-		log.Fatal(http.ListenAndServe(":26657", nil))
+		log.Fatal(http.ListenAndServe(":26657", serverMux))
 	}()
 }
 
