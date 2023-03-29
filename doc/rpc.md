@@ -47,7 +47,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
         route to pruned node
     [x] /num_unconfirmed_txs?
          route to pruned node
-    [ ] /status?
+    [x] /status?
          route to pruned node
     [ ] /subscribe?query=_
         not supported, use pruned node directly
