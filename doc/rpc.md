@@ -31,7 +31,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
         route to pruned node
     [x] /commit?height=_
         base on height
-    [ ] /consensus_params?height=_
+    [x] /consensus_params?height=_
         base on height
     [ ] /consensus_state?
          route to pruned node
