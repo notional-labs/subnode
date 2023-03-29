@@ -52,7 +52,8 @@ func StartRpcServer() {
 				strings.HasPrefix(r.RequestURI, "/block") ||
 				strings.HasPrefix(r.RequestURI, "/block_results") ||
 				strings.HasPrefix(r.RequestURI, "/commit") ||
-				strings.HasPrefix(r.RequestURI, "/consensus_params") {
+				strings.HasPrefix(r.RequestURI, "/consensus_params") ||
+				strings.HasPrefix(r.RequestURI, "/validators") {
 				heightParam := r.URL.Query().Get("height")
 				if heightParam != "" {
 					height, err := strconv.ParseInt(heightParam, 10, 64)

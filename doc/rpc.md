@@ -61,7 +61,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
         not supported, use pruned node directly
     [x] /unsubscribe_all?
         not supported, use pruned node directly
-    [ ] /validators?height=_&page=_&per_page=_
+    [x] /validators?height=_&page=_&per_page=_
         base on height
 
 
