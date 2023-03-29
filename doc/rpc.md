@@ -7,7 +7,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
 
     [x] /abci_info?
         route to pruned node
-    [ ] /abci_query?path=_&data=_&height=_&prove=_
+    [x] /abci_query?path=_&data=_&height=_&prove=_
         base on height
     [ ] /block?height=_
         base on height
