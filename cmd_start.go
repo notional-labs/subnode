@@ -13,6 +13,7 @@ func startCmd() *cobra.Command {
 			Init()
 			StartRpcServer()
 			StartApiServer()
+			StartGrpcServer()
 
 			select {}
 
