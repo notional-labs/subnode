@@ -1,6 +1,6 @@
 ### Tendermint RPC
 
-#### URI over HTTP
+Support both `URI over HTTP` and `JSONRPC over HTTP`
 
 https://docs.tendermint.com/v0.34/rpc/#/
 
