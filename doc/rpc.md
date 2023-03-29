@@ -19,13 +19,13 @@ https://docs.tendermint.com/v0.34/rpc/#/
         not supported, should be used with indexer
     [ ] /blockchain?minHeight=_&maxHeight=_
         base on minHeight & maxHeight
-    [ ] /broadcast_evidence?evidence=_
+    [x] /broadcast_evidence?evidence=_
         route to pruned node
-    [ ] /broadcast_tx_async?tx=_
+    [x] /broadcast_tx_async?tx=_
         route to pruned node
-    [ ] /broadcast_tx_commit?tx=_
+    [x] /broadcast_tx_commit?tx=_
         route to pruned node
-    [ ] /broadcast_tx_sync?tx=_
+    [x] /broadcast_tx_sync?tx=_
         route to pruned node
     [ ] /check_tx?tx=_
         route to pruned node

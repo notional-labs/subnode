@@ -32,7 +32,8 @@ func StartRpcServer() {
 			prunedNode := SelectPrunedNode()
 			selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
-			if strings.HasPrefix(r.RequestURI, "/abci_info") {
+			if strings.HasPrefix(r.RequestURI, "/abci_info") ||
+				strings.HasPrefix(r.RequestURI, "/broadcast_") {
 				selectedHost = prunedNode.Backend.Rpc
 			} else if strings.HasPrefix(r.RequestURI, "/abci_query") ||
 				strings.HasPrefix(r.RequestURI, "/block") ||
