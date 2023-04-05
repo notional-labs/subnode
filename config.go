@@ -29,6 +29,14 @@ const (
 	BackendNodeTypeArchive BackendNodeType = 2
 )
 
+type ProtocolType uint8
+
+const (
+	ProtocolTypeRpc  ProtocolType = 0
+	ProtocolTypeApi  ProtocolType = 1
+	ProtocolTypeGrpc ProtocolType = 2
+)
+
 func GetBackendNodeType(b *Backend) BackendNodeType {
 	switch c := len(b.Blocks); c {
 	case 0:

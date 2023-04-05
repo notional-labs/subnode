@@ -23,7 +23,7 @@ func StartGrpcServer() {
 		md, ok := metadata.FromIncomingContext(ctx)
 		outCtx := metadata.NewOutgoingContext(ctx, md.Copy()) // Copy the inbound metadata explicitly.
 		if ok {
-			prunedNode := SelectPrunedNodeGrpc()
+			prunedNode := SelectPrunedNode(ProtocolTypeGrpc)
 			selectedHost := prunedNode.Backend.Grpc // default to pruned node
 
 			// Decide on which backend to dial
@@ -37,7 +37,7 @@ func StartGrpcServer() {
 					return nil, nil, status.Errorf(codes.InvalidArgument, "Invalid x-cosmos-block-height")
 				}
 
-				node, err := SelectMatchedNodeGrpc(height)
+				node, err := SelectMatchedBackend(height, ProtocolTypeGrpc)
 				if err != nil {
 					return nil, nil, status.Errorf(codes.InvalidArgument, "Invalid x-cosmos-block-height")
 				}

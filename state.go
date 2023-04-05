@@ -89,8 +89,10 @@ func InitPool() {
 	TaskUpdateState()
 }
 
-func SelectPrunedNodeRpc() *BackendState {
-	for _, s := range PoolRpc {
+func SelectPrunedNode(t ProtocolType) *BackendState {
+	pool := GetPool(t)
+
+	for _, s := range pool {
 		if s.NodeType == BackendNodeTypePruned {
 			return s
 		}
@@ -99,37 +101,37 @@ func SelectPrunedNodeRpc() *BackendState {
 	return nil
 }
 
-func SelectPrunedNodeApi() *BackendState {
-	for _, s := range PoolApi {
-		if s.NodeType == BackendNodeTypePruned {
-			return s
-		}
+func GetPool(t ProtocolType) []*BackendState {
+	if t == ProtocolTypeRpc {
+		return PoolRpc
+	} else if t == ProtocolTypeApi {
+		return PoolApi
+	} else if t == ProtocolTypeGrpc {
+		return PoolGrpc
 	}
 
 	return nil
 }
 
-func SelectPrunedNodeGrpc() *BackendState {
-	for _, s := range PoolGrpc {
-		if s.NodeType == BackendNodeTypePruned {
-			return s
-		}
-	}
+func SelectMatchedBackend(height int64, t ProtocolType) (*BackendState, error) {
+	pool := GetPool(t)
 
-	return nil
-}
-
-func SelectMatchedNodeRpc(height int64) (*BackendState, error) {
-	for _, s := range PoolRpc {
-		fmt.Printf("debug: %+v\n", s)
+	for _, s := range pool {
+		//fmt.Printf("debug: %+v\n", s)
 		if s.NodeType == BackendNodeTypePruned {
-			earliestHeight := s.LastBlock - s.Backend.Blocks[0]
-			if height >= earliestHeight {
-				return s, nil
+			if s.LastBlock > 0 { // fetched last block
+				earliestHeight := s.LastBlock - s.Backend.Blocks[0]
+				if height >= earliestHeight {
+					return s, nil
+				}
 			}
 		} else if s.NodeType == BackendNodeTypeSubNode {
-			if (height >= s.Backend.Blocks[0]) && (height <= s.Backend.Blocks[0]) {
-				return s, nil
+			if height >= s.Backend.Blocks[0] {
+				if s.Backend.Blocks[1] == 0 { // to the newest block
+					return s, nil
+				} else if height <= s.Backend.Blocks[1] {
+					return s, nil
+				}
 			}
 		} else if s.NodeType == BackendNodeTypeArchive {
 			return s, nil
@@ -139,44 +141,18 @@ func SelectMatchedNodeRpc(height int64) (*BackendState, error) {
 	return nil, errors.New("no node matched")
 }
 
-func SelectMatchedNodeApi(height int64) (*BackendState, error) {
-	for _, s := range PoolApi {
-		fmt.Printf("debug: %+v\n", s)
-		if s.NodeType == BackendNodeTypePruned {
-			earliestHeight := s.LastBlock - s.Backend.Blocks[0]
-			if height >= earliestHeight {
-				return s, nil
-			}
-		} else if s.NodeType == BackendNodeTypeSubNode {
-			if (height >= s.Backend.Blocks[0]) && (height <= s.Backend.Blocks[0]) {
-				return s, nil
-			}
-		} else if s.NodeType == BackendNodeTypeArchive {
-			return s, nil
-		}
-	}
+func IsNeededToFetchLastBlock(s *BackendState) bool {
+	return s.NodeType == BackendNodeTypePruned
 
-	return nil, errors.New("no node matched")
-}
+	//if (s.NodeType == BackendNodeTypePruned) || (s.NodeType == BackendNodeTypeArchive) {
+	//	return true
+	//} else if s.NodeType == BackendNodeTypeSubNode {
+	//	if s.Backend.Blocks[1] == 0 {
+	//		return true
+	//	}
+	//}
 
-func SelectMatchedNodeGrpc(height int64) (*BackendState, error) {
-	for _, s := range PoolGrpc {
-		fmt.Printf("debug: %+v\n", s)
-		if s.NodeType == BackendNodeTypePruned {
-			earliestHeight := s.LastBlock - s.Backend.Blocks[0]
-			if height >= earliestHeight {
-				return s, nil
-			}
-		} else if s.NodeType == BackendNodeTypeSubNode {
-			if (height >= s.Backend.Blocks[0]) && (height <= s.Backend.Blocks[0]) {
-				return s, nil
-			}
-		} else if s.NodeType == BackendNodeTypeArchive {
-			return s, nil
-		}
-	}
-
-	return nil, errors.New("no node matched")
+	return false
 }
 
 func TaskUpdateState() {
@@ -189,7 +165,7 @@ func TaskUpdateState() {
 			select {
 			case <-ticker.C:
 				for _, s := range PoolRpc {
-					if s.NodeType == BackendNodeTypePruned {
+					if IsNeededToFetchLastBlock(s) {
 						height, err := FetchHeightFromStatus(s.Backend.Rpc)
 						if err == nil {
 							s.LastBlock = height
@@ -200,7 +176,7 @@ func TaskUpdateState() {
 				}
 
 				for _, s := range PoolApi {
-					if s.NodeType == BackendNodeTypePruned {
+					if IsNeededToFetchLastBlock(s) {
 						height, err := FetchHeightFromStatus(s.Backend.Rpc)
 						if err == nil {
 							s.LastBlock = height
@@ -211,7 +187,7 @@ func TaskUpdateState() {
 				}
 
 				for _, s := range PoolGrpc {
-					if s.NodeType == BackendNodeTypePruned {
+					if IsNeededToFetchLastBlock(s) {
 						height, err := FetchHeightFromStatus(s.Backend.Rpc)
 						if err == nil {
 							s.LastBlock = height

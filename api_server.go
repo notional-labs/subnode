@@ -9,7 +9,7 @@ import (
 
 func StartApiServer() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		prunedNode := SelectPrunedNodeApi()
+		prunedNode := SelectPrunedNode(ProtocolTypeApi)
 		selectedHost := prunedNode.Backend.Api // default to pruned node
 
 		if r.Method == "GET" {
@@ -22,7 +22,7 @@ func StartApiServer() {
 					SendError(w)
 				}
 
-				node, err := SelectMatchedNodeApi(height)
+				node, err := SelectMatchedBackend(height, ProtocolTypeApi)
 				if err != nil {
 					SendError(w)
 				}

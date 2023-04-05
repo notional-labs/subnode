@@ -13,7 +13,7 @@ import (
 
 func StartRpcServer() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		prunedNode := SelectPrunedNodeRpc()
+		prunedNode := SelectPrunedNode(ProtocolTypeRpc)
 		selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
 		if r.Method == "GET" { // URI over HTTP
@@ -50,7 +50,7 @@ func StartRpcServer() {
 						SendError(w)
 					}
 
-					node, err := SelectMatchedNodeRpc(height)
+					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
 					if err != nil {
 						SendError(w)
 					}
@@ -116,7 +116,7 @@ func StartRpcServer() {
 					SendError(w)
 				}
 
-				node, err := SelectMatchedNodeRpc(height)
+				node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
 				if err != nil {
 					SendError(w)
 				}
@@ -134,7 +134,7 @@ func StartRpcServer() {
 					SendError(w)
 				}
 
-				node, err := SelectMatchedNodeRpc(height)
+				node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
 				if err != nil {
 					SendError(w)
 				}

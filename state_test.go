@@ -21,7 +21,7 @@ func TestSelectPrunedNode(t *testing.T) {
 
 	InitPool()
 
-	assert.Equal(t, SelectPrunedNodeRpc().Name, pruned.Rpc)
+	assert.Equal(t, SelectPrunedNode(ProtocolTypeRpc).Name, pruned.Rpc)
 }
 
 func TestReadHeightFromStatusJson(t *testing.T) {
