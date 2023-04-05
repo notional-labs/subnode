@@ -8,10 +8,12 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"net"
 	"strconv"
+	"strings"
 )
 
 func StartGrpcServer() {
@@ -47,8 +49,13 @@ func StartGrpcServer() {
 				selectedHost = prunedNode.Backend.Grpc
 			}
 
-			// no SSL: grpc.WithTransportCredentials(insecure.NewCredentials())
-			conn, err := grpc.DialContext(ctx, selectedHost, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
+			if strings.HasSuffix(selectedHost, ":443") { // SSL
+				conn, err := grpc.DialContext(ctx, selectedHost, grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)))
+				return outCtx, conn, err
+			}
+
+			// no SSL
+			conn, err := grpc.DialContext(ctx, selectedHost, grpc.WithTransportCredentials(insecure.NewCredentials()))
 			return outCtx, conn, err
 		}
 		return nil, nil, status.Errorf(codes.Unimplemented, "Unknown method")

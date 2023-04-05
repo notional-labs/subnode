@@ -1,13 +1,13 @@
 upstream:
-  - rpc: "https://rpc-osmosis-ia.cosmosia.notional.ventures:443"
-    api: "https://api-osmosis-ia.cosmosia.notional.ventures:443"
-    grpc: "grpc-osmosis-ia.cosmosia.notional.ventures:443"
+  - rpc: "http://rpc-osmosis-ia.cosmosia.notional.ventures:80"
+    api: "http://api-osmosis-ia.cosmosia.notional.ventures:80"
+    grpc: "grpc-osmosis-ia.cosmosia.notional.ventures:9090"
     blocks: [362880]
-  - rpc: "https://rpc-osmosis-archive-sub-ia.cosmosia.notional.ventures:443"
-    api: "https://api-osmosis-archive-sub-ia.cosmosia.notional.ventures:443"
-    grpc: "grpc-osmosis-archive-sub-ia.cosmosia.notional.ventures:443"
+  - rpc: "http://rpc-osmosis-archive-sub-ia.cosmosia.notional.ventures:80"
+    api: "http://api-osmosis-archive-sub-ia.cosmosia.notional.ventures:80"
+    grpc: "grpc-osmosis-archive-sub-ia.cosmosia.notional.ventures:9090"
     blocks: [5599641,0]
-  - rpc: "https://rpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:443"
-    api: "https://api-osmosis-archive-sub1-ia.cosmosia.notional.ventures:443"
-    grpc: "grpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:443"
+  - rpc: "http://rpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:80"
+    api: "http://api-osmosis-archive-sub1-ia.cosmosia.notional.ventures:80"
+    grpc: "grpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:9090"
     blocks: [1,5599640]
