@@ -24,7 +24,7 @@ upstream:
 func TestGetBackendNodeType(t *testing.T) {
 	b := Backend{
 		Rpc:    "http://pruned",
-		Blocks: []int{10},
+		Blocks: []int64{10},
 	}
 
 	assert.Equal(t, GetBackendNodeType(&b), BackendNodeTypePruned)

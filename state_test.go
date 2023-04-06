@@ -8,11 +8,11 @@ import (
 func TestSelectPrunedNode(t *testing.T) {
 	pruned := Backend{
 		Rpc:    "http://pruned",
-		Blocks: []int{10},
+		Blocks: []int64{10},
 	}
 	archive := Backend{
 		Rpc:    "http://archive",
-		Blocks: []int{},
+		Blocks: []int64{},
 	}
 
 	cfg = &Config{

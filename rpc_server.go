@@ -79,9 +79,13 @@ func StartRpcServer() {
 
 			m0 := j0.(map[string]interface{})
 			method := m0["method"].(string)
-			params := m0["params"].([]interface{})
+			//params := m0["params"].([]interface{})
 
-			fmt.Printf("method=%s, params=%+v\n", method, params)
+			fmt.Printf("method=%s, params=%+v\n", method, m0["params"])
+
+			// note that params could be positional parameters or named parameters
+			// eg.,  "params": [ "9045128", "1", "30" ]
+			//   or  "params": { "height": "9045128", "page": "1", "per_page": "30" }
 
 			if method == "abci_info" ||
 				strings.HasPrefix(method, "broadcast_") ||
@@ -105,14 +109,28 @@ func StartRpcServer() {
 				method == "consensus_params" ||
 				method == "validators" {
 
-				// height is 1st param
-				if len(params) < 1 {
-					SendError(w)
+				height := int64(0)
+
+				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
+					// height is 1st param
+					if len(positionalParams) < 1 {
+						SendError(w)
+					}
+
+					heightParam := positionalParams[0].(string)
+					height, err = strconv.ParseInt(heightParam, 10, 64)
+					if err != nil {
+						SendError(w)
+					}
+				} else if namedParams, ok := m0["params"].(map[string]interface{}); ok { // named parameters
+					heightParam := namedParams["height"].(string)
+					height, err = strconv.ParseInt(heightParam, 10, 64)
+					if err != nil {
+						SendError(w)
+					}
 				}
 
-				heightParam := params[0].(string)
-				height, err := strconv.ParseInt(heightParam, 10, 64)
-				if err != nil {
+				if height == 0 {
 					SendError(w)
 				}
 
@@ -123,14 +141,28 @@ func StartRpcServer() {
 
 				selectedHost = node.Backend.Rpc
 			} else if method == "abci_query" {
-				// height is 3rd param
-				if len(params) < 3 {
-					SendError(w)
+				height := int64(0)
+
+				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
+					// height is 3rd param
+					if len(positionalParams) < 3 {
+						SendError(w)
+					}
+
+					heightParam := positionalParams[2].(string)
+					height, err = strconv.ParseInt(heightParam, 10, 64)
+					if err != nil {
+						SendError(w)
+					}
+				} else if namedParams, ok := m0["params"].(map[string]interface{}); ok { // named parameters
+					heightParam := namedParams["height"].(string)
+					height, err = strconv.ParseInt(heightParam, 10, 64)
+					if err != nil {
+						SendError(w)
+					}
 				}
 
-				heightParam := params[2].(string)
-				height, err := strconv.ParseInt(heightParam, 10, 64)
-				if err != nil {
+				if height == 0 {
 					SendError(w)
 				}
 
