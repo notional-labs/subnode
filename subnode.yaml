@@ -10,4 +10,4 @@ upstream:
   - rpc: "http://rpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:80"
     api: "http://api-osmosis-archive-sub1-ia.cosmosia.notional.ventures:80"
     grpc: "grpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:9090"
-    blocks: [1,5599640]
+    blocks: [0,5599640]

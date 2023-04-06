@@ -48,11 +48,13 @@ func StartRpcServer() {
 					height, err := strconv.ParseInt(heightParam, 10, 64)
 					if err != nil {
 						SendError(w)
+						return
 					}
 
 					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
 					if err != nil {
 						SendError(w)
+						return
 					}
 
 					selectedHost = node.Backend.Rpc
@@ -67,6 +69,7 @@ func StartRpcServer() {
 			body, err := io.ReadAll(r.Body)
 			if err != nil {
 				SendError(w)
+				return
 			}
 
 			fmt.Printf("body=%s\n", string(body))
@@ -75,6 +78,7 @@ func StartRpcServer() {
 			err = json.Unmarshal(body, &j0)
 			if err != nil {
 				SendError(w)
+				return
 			}
 
 			m0 := j0.(map[string]interface{})
@@ -109,68 +113,73 @@ func StartRpcServer() {
 				method == "consensus_params" ||
 				method == "validators" {
 
-				height := int64(0)
+				height := int64(-1)
 
 				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
 					// height is 1st param
 					if len(positionalParams) < 1 {
 						SendError(w)
+						return
 					}
 
 					heightParam := positionalParams[0].(string)
 					height, err = strconv.ParseInt(heightParam, 10, 64)
 					if err != nil {
 						SendError(w)
+						return
 					}
 				} else if namedParams, ok := m0["params"].(map[string]interface{}); ok { // named parameters
 					heightParam := namedParams["height"].(string)
 					height, err = strconv.ParseInt(heightParam, 10, 64)
 					if err != nil {
 						SendError(w)
+						return
 					}
 				}
 
-				if height == 0 {
-					SendError(w)
-				}
+				if height >= 0 {
+					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+					if err != nil {
+						SendError(w)
+						return
+					}
 
-				node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
-				if err != nil {
-					SendError(w)
+					selectedHost = node.Backend.Rpc
 				}
-
-				selectedHost = node.Backend.Rpc
 			} else if method == "abci_query" {
-				height := int64(0)
+				height := int64(-1)
 
 				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
 					// height is 3rd param
 					if len(positionalParams) < 3 {
 						SendError(w)
+						return
 					}
 
 					heightParam := positionalParams[2].(string)
 					height, err = strconv.ParseInt(heightParam, 10, 64)
 					if err != nil {
 						SendError(w)
+						return
 					}
 				} else if namedParams, ok := m0["params"].(map[string]interface{}); ok { // named parameters
-					heightParam := namedParams["height"].(string)
-					height, err = strconv.ParseInt(heightParam, 10, 64)
-					if err != nil {
-						SendError(w)
+					if heightParam, ok := namedParams["height"].(string); ok {
+						height, err = strconv.ParseInt(heightParam, 10, 64)
+						if err != nil {
+							SendError(w)
+							return
+						}
 					}
 				}
 
-				if height == 0 {
-					SendError(w)
+				if height >= 0 {
+					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+					if err != nil {
+						SendError(w)
+						return
+					}
+					selectedHost = node.Backend.Rpc
 				}
-
-				node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
-				if err != nil {
-					SendError(w)
-				}
-				selectedHost = node.Backend.Rpc
 			}
 
 			r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
@@ -178,6 +187,7 @@ func StartRpcServer() {
 			ProxyMapRpc[selectedHost].ServeHTTP(w, r)
 		} else {
 			SendError(w)
+			return
 		}
 	}
 
