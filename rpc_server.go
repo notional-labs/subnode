@@ -57,6 +57,13 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		} else {
 			selectedHost = prunedNode.Backend.Rpc
 		}
+	} else { // try to support partially for other methods
+		if strings.HasPrefix(r.RequestURI, "/tx_search") {
+			strQuery := r.URL.Query().Encode()
+			//fmt.Printf("query=%s", strQuery)
+			DoAggeratorUriOverHttp_tx_search(w, strQuery)
+			return
+		}
 	}
 
 	r.Host = r.URL.Host
