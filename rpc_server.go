@@ -181,6 +181,11 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 			}
 			selectedHost = node.Backend.Rpc
 		}
+	} else { // try to support partially for other methods
+		if method == "tx_search" {
+			DoAggeratorJsonRpcOverHttp_tx_search(w, body)
+			return
+		}
 	}
 
 	r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
@@ -191,7 +196,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 func StartRpcServer() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" { // URI over HTTP
-			// see `/doc/rpc.md` to see the logic
+			// see `/doc/rpc.md` and `https://github.com/tendermint/tendermint/blob/main/light/proxy/routes.go` to see the logic
 			uriOverHttp(w, r)
 
 		} else if r.Method == "POST" { // JSONRPC over HTTP
