@@ -11,13 +11,37 @@ import (
 // the logic here is it will iterate all the subnodes until result is found
 // https://github.com/notional-labs/subnode/issues/20
 
+func DoAggeratorJsonRpcOverHttp_tx(w http.ResponseWriter, jsonBody []byte) {
+	for i, s := range PoolRpc {
+		rpcUrl := s.Backend.Rpc
+		body, err := FetchJsonRpcOverHttp(rpcUrl, jsonBody)
+		if err == nil {
+			var j0 interface{}
+			err = json.Unmarshal(body, &j0)
+			if err != nil {
+				SendError(w)
+				return
+			}
+
+			if m0, ok := j0.(map[string]interface{}); ok {
+				if result, ok := m0["result"].(map[string]interface{}); ok {
+					if (result["hash"] != nil) || (i >= len(PoolRpc)-1) { // found result or last node, send it
+						SendResult(w, body)
+						return
+					}
+				}
+			}
+		}
+	}
+
+	SendError(w)
+}
+
 func DoAggeratorJsonRpcOverHttp_block_by_hash(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc
 		body, err := FetchJsonRpcOverHttp(rpcUrl, jsonBody)
 		if err == nil {
-			//fmt.Printf("DoAggeratorJsonRpcOverHttp_block_by_hash, body=%s\n", string(body))
-
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
 			if err != nil {
@@ -44,8 +68,6 @@ func DoAggeratorJsonRpcOverHttp_tx_search(w http.ResponseWriter, jsonBody []byte
 		rpcUrl := s.Backend.Rpc
 		body, err := FetchJsonRpcOverHttp(rpcUrl, jsonBody)
 		if err == nil {
-			//fmt.Printf("DoAggeratorJsonRpcOverHttp_tx_search, body=%s\n", string(body))
-
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
 			if err != nil {
@@ -69,15 +91,37 @@ func DoAggeratorJsonRpcOverHttp_tx_search(w http.ResponseWriter, jsonBody []byte
 	SendError(w)
 }
 
+func DoAggeratorUriOverHttp_tx(w http.ResponseWriter, strQuery string) {
+	for i, s := range PoolRpc {
+		rpcUrl := s.Backend.Rpc + "/tx?" + strQuery
+		body, err := FetchUriOverHttp(rpcUrl)
+		if err == nil {
+			var j0 interface{}
+			err = json.Unmarshal(body, &j0)
+			if err != nil {
+				SendError(w)
+				return
+			}
+
+			if m0, ok := j0.(map[string]interface{}); ok {
+				if result, ok := m0["result"].(map[string]interface{}); ok {
+					if (result["hash"] != nil) || (i >= len(PoolRpc)-1) { // found result or last node, send it
+						SendResult(w, body)
+						return
+					}
+				}
+			}
+		}
+	}
+
+	SendError(w)
+}
+
 func DoAggeratorUriOverHttp_block_by_hash(w http.ResponseWriter, strQuery string) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/block_by_hash?" + strQuery
-
-		//fmt.Printf("DoAggeratorUriOverHttp_block_by_hash, rpcUrl=%s\n", rpcUrl)
 		body, err := FetchUriOverHttp(rpcUrl)
 		if err == nil {
-			//fmt.Printf("DoAggeratorUriOverHttp_block_by_hash, body=%s\n", string(body))
-
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
 			if err != nil {
@@ -102,12 +146,8 @@ func DoAggeratorUriOverHttp_block_by_hash(w http.ResponseWriter, strQuery string
 func DoAggeratorUriOverHttp_tx_search(w http.ResponseWriter, strQuery string) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/tx_search?" + strQuery
-
-		//fmt.Printf("DoAggeratorUriOverHttp_tx_search, rpcUrl=%s\n", rpcUrl)
 		body, err := FetchUriOverHttp(rpcUrl)
 		if err == nil {
-			//fmt.Printf("DoAggeratorUriOverHttp_tx_search, body=%s\n", string(body))
-
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
 			if err != nil {

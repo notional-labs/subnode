@@ -67,6 +67,9 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		} else if strings.HasPrefix(r.RequestURI, "/block_by_hash") {
 			DoAggeratorUriOverHttp_block_by_hash(w, strQuery)
 			return
+		} else if strings.HasPrefix(r.RequestURI, "/tx") {
+			DoAggeratorUriOverHttp_tx(w, strQuery)
+			return
 		}
 	}
 
@@ -199,8 +202,10 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 		} else if method == "block_by_hash" {
 			DoAggeratorJsonRpcOverHttp_block_by_hash(w, body)
 			return
+		} else if method == "tx" {
+			DoAggeratorJsonRpcOverHttp_tx(w, body)
+			return
 		}
-
 	}
 
 	r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
