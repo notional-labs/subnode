@@ -57,6 +57,25 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		} else {
 			selectedHost = prunedNode.Backend.Rpc
 		}
+	} else if strings.HasPrefix(r.RequestURI, "/blockchain") { // base on maxHeight
+		heightParam := r.URL.Query().Get("maxHeight")
+		if heightParam != "" {
+			height, err := strconv.ParseInt(heightParam, 10, 64)
+			if err != nil {
+				SendError(w)
+				return
+			}
+
+			node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+			if err != nil {
+				SendError(w)
+				return
+			}
+
+			selectedHost = node.Backend.Rpc
+		} else {
+			selectedHost = prunedNode.Backend.Rpc
+		}
 	} else { // try to support partially for other methods
 		strQuery := r.URL.Query().Encode()
 		//fmt.Printf("query=%s", strQuery)
@@ -96,115 +115,156 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	m0 := j0.(map[string]interface{})
-	method := m0["method"].(string)
-	//params := m0["params"].([]interface{})
+	if m0, ok := j0.(map[string]interface{}); ok {
+		if method, ok := m0["method"].(string); ok {
+			//params := m0["params"].([]interface{})
 
-	fmt.Printf("method=%s, params=%+v\n", method, m0["params"])
+			fmt.Printf("method=%s, params=%+v\n", method, m0["params"])
 
-	// note that params could be positional parameters or named parameters
-	// eg.,  "params": [ "9045128", "1", "30" ]
-	//   or  "params": { "height": "9045128", "page": "1", "per_page": "30" }
+			// note that params could be positional parameters or named parameters
+			// eg.,  "params": [ "9045128", "1", "30" ]
+			//   or  "params": { "height": "9045128", "page": "1", "per_page": "30" }
 
-	if method == "abci_info" ||
-		strings.HasPrefix(method, "broadcast_") ||
-		method == "check_tx" ||
-		method == "consensus_state" ||
-		method == "dump_consensus_state" ||
-		method == "genesis" ||
-		method == "genesis_chunked" ||
-		method == "health" ||
-		method == "net_info" ||
-		method == "num_unconfirmed_txs" ||
-		method == "status" ||
-		method == "subscribe" ||
-		method == "unconfirmed_txs" ||
-		method == "unsubscribe" ||
-		method == "unsubscribe_all" {
-		selectedHost = prunedNode.Backend.Rpc
-	} else if method == "block" ||
-		method == "block_results" ||
-		method == "commit" ||
-		method == "consensus_params" ||
-		method == "validators" {
+			if method == "abci_info" ||
+				strings.HasPrefix(method, "broadcast_") ||
+				method == "check_tx" ||
+				method == "consensus_state" ||
+				method == "dump_consensus_state" ||
+				method == "genesis" ||
+				method == "genesis_chunked" ||
+				method == "health" ||
+				method == "net_info" ||
+				method == "num_unconfirmed_txs" ||
+				method == "status" ||
+				method == "subscribe" ||
+				method == "unconfirmed_txs" ||
+				method == "unsubscribe" ||
+				method == "unsubscribe_all" {
+				selectedHost = prunedNode.Backend.Rpc
+			} else if method == "block" ||
+				method == "block_results" ||
+				method == "commit" ||
+				method == "consensus_params" ||
+				method == "validators" {
 
-		height := int64(-1)
+				height := int64(-1)
 
-		if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
-			// height is 1st param
-			if len(positionalParams) < 1 {
-				SendError(w)
-				return
-			}
+				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
+					// height is 1st param
+					if len(positionalParams) < 1 {
+						SendError(w)
+						return
+					}
 
-			heightParam := positionalParams[0].(string)
-			height, err = strconv.ParseInt(heightParam, 10, 64)
-			if err != nil {
-				SendError(w)
-				return
-			}
-		} else if namedParams, ok := m0["params"].(map[string]interface{}); ok { // named parameters
-			heightParam := namedParams["height"].(string)
-			height, err = strconv.ParseInt(heightParam, 10, 64)
-			if err != nil {
-				SendError(w)
-				return
-			}
-		}
+					if heightParam, ok := positionalParams[0].(string); ok {
+						height, err = strconv.ParseInt(heightParam, 10, 64)
+						if err != nil {
+							SendError(w)
+							return
+						}
+					}
+				} else if namedParams, ok := m0["params"].(map[string]interface{}); ok { // named parameters
+					if heightParam, ok := namedParams["height"].(string); ok {
+						height, err = strconv.ParseInt(heightParam, 10, 64)
+						if err != nil {
+							SendError(w)
+							return
+						}
+					}
+				}
 
-		if height >= 0 {
-			node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
-			if err != nil {
-				SendError(w)
-				return
-			}
+				if height >= 0 {
+					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+					if err != nil {
+						SendError(w)
+						return
+					}
 
-			selectedHost = node.Backend.Rpc
-		}
-	} else if method == "abci_query" {
-		height := int64(-1)
+					selectedHost = node.Backend.Rpc
+				}
+			} else if method == "blockchain" { // base on maxHeight
+				height := int64(-1)
 
-		if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
-			// height is 3rd param
-			if len(positionalParams) < 3 {
-				SendError(w)
-				return
-			}
+				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
+					// maxHeight is 2nd param
+					if len(positionalParams) < 2 {
+						SendError(w)
+						return
+					}
 
-			heightParam := positionalParams[2].(string)
-			height, err = strconv.ParseInt(heightParam, 10, 64)
-			if err != nil {
-				SendError(w)
-				return
-			}
-		} else if namedParams, ok := m0["params"].(map[string]interface{}); ok { // named parameters
-			if heightParam, ok := namedParams["height"].(string); ok {
-				height, err = strconv.ParseInt(heightParam, 10, 64)
-				if err != nil {
-					SendError(w)
+					if heightParam, ok := positionalParams[1].(string); ok {
+						height, err = strconv.ParseInt(heightParam, 10, 64)
+						if err != nil {
+							SendError(w)
+							return
+						}
+					}
+				} else if namedParams, ok := m0["params"].(map[string]interface{}); ok { // named parameters
+					if heightParam, ok := namedParams["maxHeight"].(string); ok {
+						height, err = strconv.ParseInt(heightParam, 10, 64)
+						if err != nil {
+							SendError(w)
+							return
+						}
+					}
+				}
+
+				if height >= 0 {
+					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+					if err != nil {
+						SendError(w)
+						return
+					}
+
+					selectedHost = node.Backend.Rpc
+				}
+			} else if method == "abci_query" {
+				height := int64(-1)
+
+				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
+					// height is 3rd param
+					if len(positionalParams) < 3 {
+						SendError(w)
+						return
+					}
+
+					if heightParam, ok := positionalParams[2].(string); ok {
+						height, err = strconv.ParseInt(heightParam, 10, 64)
+						if err != nil {
+							SendError(w)
+							return
+						}
+					}
+				} else if namedParams, ok := m0["params"].(map[string]interface{}); ok { // named parameters
+					if heightParam, ok := namedParams["height"].(string); ok {
+						height, err = strconv.ParseInt(heightParam, 10, 64)
+						if err != nil {
+							SendError(w)
+							return
+						}
+					}
+				}
+
+				if height >= 0 {
+					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+					if err != nil {
+						SendError(w)
+						return
+					}
+					selectedHost = node.Backend.Rpc
+				}
+			} else { // try to support partially for other methods
+				if method == "tx_search" {
+					DoAggeratorJsonRpcOverHttp_tx_search(w, body)
+					return
+				} else if method == "block_by_hash" {
+					DoAggeratorJsonRpcOverHttp_block_by_hash(w, body)
+					return
+				} else if method == "tx" {
+					DoAggeratorJsonRpcOverHttp_tx(w, body)
 					return
 				}
 			}
-		}
-
-		if height >= 0 {
-			node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
-			if err != nil {
-				SendError(w)
-				return
-			}
-			selectedHost = node.Backend.Rpc
-		}
-	} else { // try to support partially for other methods
-		if method == "tx_search" {
-			DoAggeratorJsonRpcOverHttp_tx_search(w, body)
-			return
-		} else if method == "block_by_hash" {
-			DoAggeratorJsonRpcOverHttp_block_by_hash(w, body)
-			return
-		} else if method == "tx" {
-			DoAggeratorJsonRpcOverHttp_tx(w, body)
-			return
 		}
 	}
 

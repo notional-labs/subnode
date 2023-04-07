@@ -17,8 +17,8 @@ https://docs.tendermint.com/v0.34/rpc/#/
         base on height
     [ ] /block_search?query=_&page=_&per_page=_&order_by=_
         not supported, should be used with indexer
-    [ ] /blockchain?minHeight=_&maxHeight=_
-        base on minHeight & maxHeight
+    [x] /blockchain?minHeight=_&maxHeight=_
+        base on maxHeight
     [x] /broadcast_evidence?evidence=_
         route to pruned node
     [x] /broadcast_tx_async?tx=_
