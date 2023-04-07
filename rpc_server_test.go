@@ -24,3 +24,15 @@ func TestJsonRpcParams(t *testing.T) {
 
 	fmt.Println(reflect.TypeOf(m0["params"]))
 }
+
+func TestDummy(t *testing.T) {
+	jsonText := []byte(`{"a": "aaa", "b": null}`)
+
+	var j0 interface{}
+	err := json.Unmarshal(jsonText, &j0)
+	assert.NoError(t, err)
+	m0, ok := j0.(map[string]interface{})
+	assert.True(t, ok)
+
+	fmt.Printf("b=%+v\n", m0["b"])
+}

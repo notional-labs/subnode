@@ -58,10 +58,14 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 			selectedHost = prunedNode.Backend.Rpc
 		}
 	} else { // try to support partially for other methods
+		strQuery := r.URL.Query().Encode()
+		//fmt.Printf("query=%s", strQuery)
+
 		if strings.HasPrefix(r.RequestURI, "/tx_search") {
-			strQuery := r.URL.Query().Encode()
-			//fmt.Printf("query=%s", strQuery)
 			DoAggeratorUriOverHttp_tx_search(w, strQuery)
+			return
+		} else if strings.HasPrefix(r.RequestURI, "/block_by_hash") {
+			DoAggeratorUriOverHttp_block_by_hash(w, strQuery)
 			return
 		}
 	}
@@ -192,7 +196,11 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 		if method == "tx_search" {
 			DoAggeratorJsonRpcOverHttp_tx_search(w, body)
 			return
+		} else if method == "block_by_hash" {
+			DoAggeratorJsonRpcOverHttp_block_by_hash(w, body)
+			return
 		}
+
 	}
 
 	r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
