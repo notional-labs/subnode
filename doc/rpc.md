@@ -11,8 +11,8 @@ https://docs.tendermint.com/v0.34/rpc/#/
         base on height
     [x] /block?height=_
         base on height
-    [ ] /block_by_hash?hash=_
-        not supported, should use indexer instead
+    [x] /block_by_hash?hash=_
+        iterate all the subnodes
     [x] /block_results?height=_
         base on height
     [ ] /block_search?query=_&page=_&per_page=_&order_by=_
@@ -54,7 +54,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
     [ ] /tx?hash=_&prove=_
         not supported, should use indexer instead
     [x] /tx_search?query=_&prove=_&page=_&per_page=_&order_by=_
-        support partially
+        iterate all the subnodes, support partially
     [x] /unconfirmed_txs?limit=_
         route to pruned node
     [x] /unsubscribe?query=_
