@@ -51,7 +51,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
          route to pruned node
     [x] /subscribe?query=_
         not supported, use pruned node directly
-    [ ] /tx?hash=_&prove=_
+    [x] /tx?hash=_&prove=_
         iterate all the subnodes
     [x] /tx_search?query=_&prove=_&page=_&per_page=_&order_by=_
         iterate all the subnodes, support partially
