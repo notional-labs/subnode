@@ -25,22 +25,18 @@ func DoAggeratorJsonRpcOverHttp_block_by_hash(w http.ResponseWriter, jsonBody []
 				return
 			}
 
-			m0 := j0.(map[string]interface{})
-			result := m0["result"].(map[string]interface{})
-
-			if err != nil {
-				SendError(w)
-				return
-			}
-
-			block := result["block"]
-
-			if (block != nil) || (i >= len(PoolRpc)-1) { // found result or last node, send it
-				SendResult(w, body)
-				return
+			if m0, ok := j0.(map[string]interface{}); ok {
+				if result, ok := m0["result"].(map[string]interface{}); ok {
+					if (result["block"] != nil) || (i >= len(PoolRpc)-1) { // found result or last node, send it
+						SendResult(w, body)
+						return
+					}
+				}
 			}
 		}
 	}
+
+	SendError(w)
 }
 
 func DoAggeratorJsonRpcOverHttp_tx_search(w http.ResponseWriter, jsonBody []byte) {
@@ -57,16 +53,20 @@ func DoAggeratorJsonRpcOverHttp_tx_search(w http.ResponseWriter, jsonBody []byte
 				return
 			}
 
-			m0 := j0.(map[string]interface{})
-			result := m0["result"].(map[string]interface{})
-			txs := result["txs"].([]interface{})
-
-			if (len(txs) > 0) || (i >= len(PoolRpc)-1) { // found result or last node, send it
-				SendResult(w, body)
-				return
+			if m0, ok := j0.(map[string]interface{}); ok {
+				if result, ok := m0["result"].(map[string]interface{}); ok {
+					if txs, ok := result["txs"].([]interface{}); ok {
+						if (len(txs) > 0) || (i >= len(PoolRpc)-1) { // found result or last node, send it
+							SendResult(w, body)
+							return
+						}
+					}
+				}
 			}
 		}
 	}
+
+	SendError(w)
 }
 
 func DoAggeratorUriOverHttp_block_by_hash(w http.ResponseWriter, strQuery string) {
@@ -85,16 +85,18 @@ func DoAggeratorUriOverHttp_block_by_hash(w http.ResponseWriter, strQuery string
 				return
 			}
 
-			m0 := j0.(map[string]interface{})
-			result := m0["result"].(map[string]interface{})
-			txs := result["txs"].([]interface{})
-
-			if (len(txs) > 0) || (i >= len(PoolRpc)-1) { // found result or last node, send it
-				SendResult(w, body)
-				return
+			if m0, ok := j0.(map[string]interface{}); ok {
+				if result, ok := m0["result"].(map[string]interface{}); ok {
+					if (result["block"] != nil) || (i >= len(PoolRpc)-1) { // found result or last node, send it
+						SendResult(w, body)
+						return
+					}
+				}
 			}
 		}
 	}
+
+	SendError(w)
 }
 
 func DoAggeratorUriOverHttp_tx_search(w http.ResponseWriter, strQuery string) {
@@ -113,16 +115,20 @@ func DoAggeratorUriOverHttp_tx_search(w http.ResponseWriter, strQuery string) {
 				return
 			}
 
-			m0 := j0.(map[string]interface{})
-			result := m0["result"].(map[string]interface{})
-			txs := result["txs"].([]interface{})
-
-			if (len(txs) > 0) || (i >= len(PoolRpc)-1) { // found result or last node, send it
-				SendResult(w, body)
-				return
+			if m0, ok := j0.(map[string]interface{}); ok {
+				if result, ok := m0["result"].(map[string]interface{}); ok {
+					if txs, ok := result["txs"].([]interface{}); ok {
+						if (len(txs) > 0) || (i >= len(PoolRpc)-1) { // found result or last node, send it
+							SendResult(w, body)
+							return
+						}
+					}
+				}
 			}
 		}
 	}
+
+	SendError(w)
 }
 
 func FetchUriOverHttp(url string) ([]byte, error) {
