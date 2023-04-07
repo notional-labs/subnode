@@ -158,44 +158,15 @@ func IsNeededToFetchLastBlock(s *BackendState) bool {
 func TaskUpdateState() {
 	// call close(quit) to stop
 
+	doUpdateState() // call the 1st time immediately after starting
+
 	ticker := time.NewTicker(30 * time.Second)
 	quit := make(chan struct{})
 	go func() {
 		for {
 			select {
 			case <-ticker.C:
-				for _, s := range PoolRpc {
-					if IsNeededToFetchLastBlock(s) {
-						height, err := FetchHeightFromStatus(s.Backend.Rpc)
-						if err == nil {
-							s.LastBlock = height
-						} else {
-							fmt.Println("Err FetchHeightFromStatus", err)
-						}
-					}
-				}
-
-				for _, s := range PoolApi {
-					if IsNeededToFetchLastBlock(s) {
-						height, err := FetchHeightFromStatus(s.Backend.Rpc)
-						if err == nil {
-							s.LastBlock = height
-						} else {
-							fmt.Println("Err FetchHeightFromStatus", err)
-						}
-					}
-				}
-
-				for _, s := range PoolGrpc {
-					if IsNeededToFetchLastBlock(s) {
-						height, err := FetchHeightFromStatus(s.Backend.Rpc)
-						if err == nil {
-							s.LastBlock = height
-						} else {
-							fmt.Println("Err FetchHeightFromStatus", err)
-						}
-					}
-				}
+				doUpdateState()
 
 			case <-quit:
 				ticker.Stop()
@@ -203,6 +174,41 @@ func TaskUpdateState() {
 			}
 		}
 	}()
+}
+
+func doUpdateState() {
+	for _, s := range PoolRpc {
+		if IsNeededToFetchLastBlock(s) {
+			height, err := FetchHeightFromStatus(s.Backend.Rpc)
+			if err == nil {
+				s.LastBlock = height
+			} else {
+				fmt.Println("Err FetchHeightFromStatus", err)
+			}
+		}
+	}
+
+	for _, s := range PoolApi {
+		if IsNeededToFetchLastBlock(s) {
+			height, err := FetchHeightFromStatus(s.Backend.Rpc)
+			if err == nil {
+				s.LastBlock = height
+			} else {
+				fmt.Println("Err FetchHeightFromStatus", err)
+			}
+		}
+	}
+
+	for _, s := range PoolGrpc {
+		if IsNeededToFetchLastBlock(s) {
+			height, err := FetchHeightFromStatus(s.Backend.Rpc)
+			if err == nil {
+				s.LastBlock = height
+			} else {
+				fmt.Println("Err FetchHeightFromStatus", err)
+			}
+		}
+	}
 }
 
 func FetchHeightFromStatus(rpcUrl string) (int64, error) {
