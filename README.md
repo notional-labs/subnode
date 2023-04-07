@@ -13,12 +13,17 @@ Each subnode stores data of 5 millions blocks or 5 TB. Old subnodes are read-onl
 
 As data is spreaded over multiple sub-nodes, its required to have a proxy which aggreates data from sub-nodes and provides compatible rpc/api.
 
-
 #### Supported Protocols
 - [Tendermint RPC/JSONRPC](doc/rpc.md) on port 26657
 - LCD/API on port 1337
 - GRPC on port 9090
 
+Public enndpoints of subnode with the config below:
+```console
+https://rpc-osmosis-sub.cosmosia.notional.ventures/
+https://api-osmosis-sub.cosmosia.notional.ventures/
+grpc-osmosis-sub.cosmosia.notional.ventures:443
+```
 
 
 #### Configuration
