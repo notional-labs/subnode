@@ -43,7 +43,7 @@ upstream:
   - rpc: "https://rpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:443"
     api: "https://api-osmosis-archive-sub1-ia.cosmosia.notional.ventures:443"
     grpc: "grpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:443"
-    blocks: [1,5599640]
+    blocks: [0,5599640]
 ```
 
 `blocks` config example:
