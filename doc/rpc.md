@@ -52,7 +52,7 @@ https://docs.tendermint.com/v0.34/rpc/#/
     [x] /subscribe?query=_
         not supported, use pruned node directly
     [ ] /tx?hash=_&prove=_
-        not supported, should use indexer instead
+        iterate all the subnodes
     [x] /tx_search?query=_&prove=_&page=_&per_page=_&order_by=_
         iterate all the subnodes, support partially
     [x] /unconfirmed_txs?limit=_
