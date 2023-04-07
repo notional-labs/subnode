@@ -89,6 +89,9 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		} else if strings.HasPrefix(r.RequestURI, "/tx") {
 			DoAggeratorUriOverHttp_tx(w, strQuery)
 			return
+		} else if strings.HasPrefix(r.RequestURI, "/block_search") {
+			DoAggeratorUriOverHttp_block_search(w, strQuery)
+			return
 		}
 	}
 
@@ -262,6 +265,9 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					return
 				} else if method == "tx" {
 					DoAggeratorJsonRpcOverHttp_tx(w, body)
+					return
+				} else if method == "block_search" {
+					DoAggeratorJsonRpcOverHttp_block_search(w, body)
 					return
 				}
 			}

@@ -15,8 +15,8 @@ https://docs.tendermint.com/v0.34/rpc/#/
         iterate all the subnodes
     [x] /block_results?height=_
         base on height
-    [ ] /block_search?query=_&page=_&per_page=_&order_by=_
-        not supported, should be used with indexer
+    [x] /block_search?query=_&page=_&per_page=_&order_by=_
+        iterate all the subnodes, support partially
     [x] /blockchain?minHeight=_&maxHeight=_
         base on maxHeight
     [x] /broadcast_evidence?evidence=_
