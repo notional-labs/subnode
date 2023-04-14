@@ -27,7 +27,7 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		strings.HasPrefix(r.RequestURI, "/health") ||
 		strings.HasPrefix(r.RequestURI, "/net_info") ||
 		strings.HasPrefix(r.RequestURI, "/num_unconfirmed_txs") ||
-		strings.HasPrefix(r.RequestURI, "/status") ||
+		//strings.HasPrefix(r.RequestURI, "/status") ||
 		strings.HasPrefix(r.RequestURI, "/subscribe") ||
 		strings.HasPrefix(r.RequestURI, "/unconfirmed_txs") ||
 		strings.HasPrefix(r.RequestURI, "/unsubscribe") ||
@@ -80,7 +80,10 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		strQuery := r.URL.Query().Encode()
 		//fmt.Printf("query=%s", strQuery)
 
-		if strings.HasPrefix(r.RequestURI, "/tx_search") {
+		if strings.HasPrefix(r.RequestURI, "/status") {
+			DoAggeratorUriOverHttp_status(w, strQuery)
+			return
+		} else if strings.HasPrefix(r.RequestURI, "/tx_search") {
 			DoAggeratorUriOverHttp_tx_search(w, strQuery)
 			return
 		} else if strings.HasPrefix(r.RequestURI, "/block_by_hash") {
