@@ -33,6 +33,11 @@ func DoAggeratorUriOverHttp_status(w http.ResponseWriter, strQuery string) {
 					body, _ = sjson.SetBytes(body, "result.sync_info.earliest_app_hash", "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855")
 					body, _ = sjson.SetBytes(body, "result.sync_info.earliest_block_height", "1")
 					body, _ = sjson.SetBytes(body, "result.sync_info.earliest_block_time", "2021-06-18T17:00:00Z")
+				} else if node_info["network"] == "evmos_9001-2" {
+					body, _ = sjson.SetBytes(body, "result.sync_info.earliest_block_hash", "8DC1D7117398EBCBDA6BA4640AEA7DC1CDA99427934656B1E95B6C1927C8A124")
+					body, _ = sjson.SetBytes(body, "result.sync_info.earliest_app_hash", "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855")
+					body, _ = sjson.SetBytes(body, "result.sync_info.earliest_block_height", "58701")
+					body, _ = sjson.SetBytes(body, "result.sync_info.earliest_block_time", "2022-04-27T16:00:00Z")
 				}
 			}
 		}
