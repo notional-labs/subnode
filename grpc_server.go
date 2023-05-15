@@ -16,6 +16,8 @@ import (
 	"strings"
 )
 
+var grpcServer *grpc.Server
+
 func StartGrpcServer() {
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: false,
@@ -61,11 +63,15 @@ func StartGrpcServer() {
 		return nil, nil, status.Errorf(codes.Unimplemented, "Unknown method")
 	}
 
-	srv := grpc.NewServer(grpc.UnknownServiceHandler(proxy.TransparentHandler(director)))
+	grpcServer := grpc.NewServer(grpc.UnknownServiceHandler(proxy.TransparentHandler(director)))
 	lis, err := net.Listen("tcp", ":9090")
 	if err != nil {
 		panic(err)
 	}
 
-	srv.Serve(lis)
+	grpcServer.Serve(lis)
+}
+
+func ShutdownGrpcServer() {
+	grpcServer.GracefulStop()
 }

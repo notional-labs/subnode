@@ -10,3 +10,9 @@ func Start() error {
 
 	return nil
 }
+
+func Shutdown() {
+	ShutdownRpcServer()
+	ShutdownApiServer()
+	ShutdownGrpcServer()
+}
