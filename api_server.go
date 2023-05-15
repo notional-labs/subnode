@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 )
+
+var apiServer *http.Server
 
 func StartApiServer() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
@@ -47,6 +50,14 @@ func StartApiServer() {
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/", handler)
 	go func() {
-		log.Fatal(http.ListenAndServe(":1337", serverMux))
+		//log.Fatal(http.ListenAndServe(":1337", serverMux))
+		apiServer = &http.Server{Addr: ":1337", Handler: serverMux}
+		log.Fatal(apiServer.ListenAndServe())
 	}()
+}
+
+func ShutdownApiServer() {
+	if err := apiServer.Shutdown(context.Background()); err != nil {
+		log.Printf("apiServer Shutdown: %v", err)
+	}
 }

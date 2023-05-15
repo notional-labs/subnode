@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 )
+
+var rpcServer *http.Server
 
 func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 	prunedNode := SelectPrunedNode(ProtocolTypeRpc)
@@ -301,8 +304,17 @@ func StartRpcServer() {
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/", handler)
 	go func() {
-		log.Fatal(http.ListenAndServe(":26657", serverMux))
+		//log.Fatal(http.ListenAndServe(":26657", serverMux))
+		rpcServer = &http.Server{Addr: ":26657", Handler: serverMux}
+		log.Fatal(rpcServer.ListenAndServe())
+
 	}()
+}
+
+func ShutdownRpcServer() {
+	if err := rpcServer.Shutdown(context.Background()); err != nil {
+		log.Printf("rpcServer Shutdown: %v", err)
+	}
 }
 
 func SendError(w http.ResponseWriter) {
