@@ -23,7 +23,7 @@ func TestRpcTestSuite(t *testing.T) {
 	suite.Run(t, new(RpcTestSuite))
 }
 
-func (s *RpcTestSuite) Test_abci_info() {
+func (s *RpcTestSuite) TestRpc_abci_info() {
 	// {"jsonrpc":"2.0","id":-1,"result":{"response":{"data":"OsmosisApp","app_version":"15","last_block_height":"9647581","last_block_app_hash":"dc6xiKez6O+kQ67w2Qh4/sR3PsbhDcrJScqtbSDQXR4="}}}
 	rpcUrl := s.UrlEndpoint + "/abci_info?"
 
@@ -36,7 +36,7 @@ func (s *RpcTestSuite) Test_abci_info() {
 	s.True(last_block_height > 0)
 }
 
-func (s *RpcTestSuite) Test_abci_query() {
+func (s *RpcTestSuite) TestRpc_abci_query() {
 	// {"jsonrpc":"2.0","id":-1,"result":{"response":{"code":0,"log":"","info":"","index":"0","key":null,"value":"","proofOps":null,"height":"9650945","codespace":"sdk"}}}
 	rpcUrl := s.UrlEndpoint + "/abci_query?path=\"/app/version\""
 
@@ -47,4 +47,15 @@ func (s *RpcTestSuite) Test_abci_query() {
 	height, err := strconv.ParseInt(str_height.(string), 10, 64)
 	s.NoError(err)
 	s.True(height > 0)
+}
+
+func (s *RpcTestSuite) TestRpc_block() {
+	// {"jsonrpc":"2.0","id":-1,"result":{"block_id":{"hash":"1FD08E9E72D3A19FA6A4F48F88026D8B74D594C3C7EE10B26A1E268E93043BA4","...
+	rpcUrl := s.UrlEndpoint + "/block?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	hash := gojsonq.New().FromString(string(body)).Find("result.block_id.hash")
+	s.True(len(hash.(string)) == 64)
 }
