@@ -1,10 +1,11 @@
-package main
+package server
 
 import (
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/notional-labs/subnode/pkg/config"
 	"io"
 	"log"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 var rpcServer *http.Server
 
 func uriOverHttp(w http.ResponseWriter, r *http.Request) {
-	prunedNode := SelectPrunedNode(ProtocolTypeRpc)
+	prunedNode := SelectPrunedNode(config.ProtocolTypeRpc)
 	selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
 	fmt.Printf("r.RequestURI=%s\n", r.RequestURI)
@@ -50,7 +51,7 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+			node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
 			if err != nil {
 				SendError(w)
 				return
@@ -69,7 +70,7 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+			node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
 			if err != nil {
 				SendError(w)
 				return
@@ -106,7 +107,7 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 }
 
 func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
-	prunedNode := SelectPrunedNode(ProtocolTypeRpc)
+	prunedNode := SelectPrunedNode(config.ProtocolTypeRpc)
 	selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
 	body, err := io.ReadAll(r.Body)
@@ -183,7 +184,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if height >= 0 {
-					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+					node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
 					if err != nil {
 						SendError(w)
 						return
@@ -219,7 +220,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if height >= 0 {
-					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+					node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
 					if err != nil {
 						SendError(w)
 						return
@@ -255,7 +256,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				}
 
 				if height >= 0 {
-					node, err := SelectMatchedBackend(height, ProtocolTypeRpc)
+					node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
 					if err != nil {
 						SendError(w)
 						return

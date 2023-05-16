@@ -1,27 +1,28 @@
-package main
+package server
 
 import (
+	"github.com/notional-labs/subnode/pkg/config"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestSelectPrunedNode(t *testing.T) {
-	pruned := Backend{
+	pruned := config.Backend{
 		Rpc:    "http://pruned",
 		Blocks: []int64{10},
 	}
-	archive := Backend{
+	archive := config.Backend{
 		Rpc:    "http://archive",
 		Blocks: []int64{},
 	}
 
-	cfg = &Config{
-		Upstream: []Backend{pruned, archive},
+	config.cfg = &config.Config{
+		Upstream: []config.Backend{pruned, archive},
 	}
 
 	InitPool()
 
-	assert.Equal(t, SelectPrunedNode(ProtocolTypeRpc).Name, pruned.Rpc)
+	assert.Equal(t, SelectPrunedNode(config.ProtocolTypeRpc).Name, pruned.Rpc)
 }
 
 func TestReadHeightFromStatusJson(t *testing.T) {

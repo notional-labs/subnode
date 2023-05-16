@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"gopkg.in/yaml.v3"
@@ -37,6 +37,10 @@ const (
 	ProtocolTypeGrpc ProtocolType = 2
 )
 
+var (
+	cfg *Config
+)
+
 func GetBackendNodeType(b *Backend) BackendNodeType {
 	switch c := len(b.Blocks); c {
 	case 0:
@@ -72,4 +76,12 @@ func LoadConfigFromBytes(buf []byte) (*Config, error) {
 	}
 
 	return c, err
+}
+
+func GetConfig() *Config {
+	return cfg
+}
+
+func SetConfig(newcfg *Config) {
+	cfg = newcfg
 }

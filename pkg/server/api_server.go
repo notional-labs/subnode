@@ -1,8 +1,9 @@
-package main
+package server
 
 import (
 	"context"
 	"fmt"
+	"github.com/notional-labs/subnode/pkg/config"
 	"log"
 	"net/http"
 	"strconv"
@@ -12,7 +13,7 @@ var apiServer *http.Server
 
 func StartApiServer() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		prunedNode := SelectPrunedNode(ProtocolTypeApi)
+		prunedNode := SelectPrunedNode(config.ProtocolTypeApi)
 		selectedHost := prunedNode.Backend.Api // default to pruned node
 
 		if r.Method == "GET" {
@@ -25,7 +26,7 @@ func StartApiServer() {
 					SendError(w)
 				}
 
-				node, err := SelectMatchedBackend(height, ProtocolTypeApi)
+				node, err := SelectMatchedBackend(height, config.ProtocolTypeApi)
 				if err != nil {
 					SendError(w)
 				}
