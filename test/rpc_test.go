@@ -291,3 +291,41 @@ func (s *RpcTestSuite) TestRpc_num_unconfirmed_txs() {
 	s.NoError(err)
 	s.True(n_txs >= 0)
 }
+
+func (s *RpcTestSuite) TestRpc_status() {
+	//{
+	//  "jsonrpc": "2.0",
+	//  "id": -1,
+	//  "result": {
+	//    "node_info": {
+	//      "protocol_version": {
+	//        "p2p": "8",
+	//        "block": "11",
+	//        "app": "15"
+	//      },
+	//      "id": "e306116770450276fb9c6c4e54fdc1f4a62f0c64",
+	//      "listen_addr": "tcp://0.0.0.0:26656",
+	//      "network": "osmosis-1",
+	//      "version": "0.34.24",
+	//      "channels": "40202122233038606100",
+	//      "moniker": "test",
+	//      "other": {
+	//        "tx_index": "on",
+	//        "rpc_address": "tcp://0.0.0.0:26657"
+	//      }
+	//    },
+	//    "sync_info": {
+	//      "latest_block_hash": "0F1B3BF38FFCF292FEFE43AB33B295322E1FBC6469D69FECD204248EE231BB72",
+	//      "latest_app_hash": "46CB155A9928BF0987305187222F81E316E79947C8F73FF8D0362F4B60014D55",
+	//      "latest_block_height": "9657269",
+
+	rpcUrl := s.UrlEndpoint + "/status?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_latest_block_height := gojsonq.New().FromString(string(body)).Find("result.sync_info.latest_block_height")
+	latest_block_height, err := strconv.ParseInt(v_latest_block_height.(string), 10, 64)
+	s.NoError(err)
+	s.True(latest_block_height > 0)
+}
