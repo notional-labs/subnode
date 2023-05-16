@@ -122,3 +122,54 @@ func (s *RpcTestSuite) TestRpc_blockchain() {
 	s.NoError(err)
 	s.True(height > 0)
 }
+
+func (s *RpcTestSuite) TestRpc_commit() {
+	//{
+	//  "jsonrpc": "2.0",
+	//  "id": -1,
+	//  "result": {
+	//    "signed_header": {
+	//      "header": {
+	//        "version": {
+	//          "block": "11",
+	//          "app": "15"
+	//        },
+	//        "chain_id": "osmosis-1",
+	//        "height": "9653379",
+	//        "time": "2023-05-16T13:21:27.960697653Z",
+	//        "last_block_id": {
+	//          "hash": "3EAC0A0A5B9FBF49E933314EF712C036C80379B31773438C72C4A4489DDE1B57",
+	//          "parts": {
+	//            "total": 1,
+	//            "hash": "3E76071B95FBA4F33E91905EBBDE8E7F7F88ABAA27EFCE7102552352508FC7C9"
+	//          }
+	//        },
+	//        "last_commit_hash": "6031EBA4FE965DC2BE7032599D9BD80DCC00F6BB60CC6237462AE9294DABF144",
+	//        "data_hash": "CEB7DDFCC16941B34ECFE5F006DB4396D87554087F3DA8F9D7E73D00F65D2214",
+	//        "validators_hash": "0DB80E04299EE9375DC265A22F65471EBC650D51AFE811E7824F87215F16CA50",
+	//        "next_validators_hash": "0DB80E04299EE9375DC265A22F65471EBC650D51AFE811E7824F87215F16CA50",
+	//        "consensus_hash": "A967D55FACBBA19AB96149048F2476C4657EC03D25B78A81AF5B8F0A08F61DFF",
+	//        "app_hash": "0A975888D47943643531180D8EA035D2EC5EF65A2ADDA76D86ECFEBC745EE11A",
+	//        "last_results_hash": "4C3D461A79BC0CFF5936558E95819266CCEB3DF556D26507E4A01E413A3DBA48",
+	//        "evidence_hash": "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855",
+	//        "proposer_address": "E5CBA199E045E7036711D814E57E2B66C3CC0391"
+	//      },
+	//      "commit": {
+	//        "height": "9653379",
+	//        "round": 0,
+	//        "block_id": {
+	//          "hash": "22D9FEFE09E1316DDACB9B6401FD90C56EAF7821C1E32DC5E9ABB1B918FAAD84",
+	//          "parts": {
+	//            "total": 1,
+	//            "hash": "59C7A2FDF47D3FB96DED16AA3FA2DB016E6A8292A4FBDCBC37477DE68DAFEC67"
+	//          }
+	//        },
+	// ...
+	rpcUrl := s.UrlEndpoint + "/commit?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_hash := gojsonq.New().FromString(string(body)).Find("result.signed_header.header.last_commit_hash")
+	s.True(len(v_hash.(string)) == 64)
+}
