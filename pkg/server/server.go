@@ -1,4 +1,4 @@
-package internal
+package server
 
 func Start() error {
 	Init()

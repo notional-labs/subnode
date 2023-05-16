@@ -1,7 +1,7 @@
 package test
 
 import (
-	sn "github.com/notional-labs/subnode/internal"
+	sn "github.com/notional-labs/subnode/pkg/utils"
 	"github.com/stretchr/testify/suite"
 	"github.com/thedevsaddam/gojsonq/v2"
 	"strconv"

@@ -1,9 +1,10 @@
-package internal
+package server
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/notional-labs/subnode/pkg/config"
 	"io"
 	"net/http"
 	"net/http/httputil"
@@ -14,10 +15,10 @@ import (
 
 type BackendState struct {
 	Name      string
-	NodeType  BackendNodeType
+	NodeType  config.BackendNodeType
 	LastBlock int64
 
-	Backend *Backend
+	Backend *config.Backend
 }
 
 var (
@@ -51,12 +52,13 @@ func Init() {
 func InitPool() {
 	PoolRpc = PoolRpc[:0] // Remove all elements
 	PoolApi = PoolApi[:0] // Remove all elements
-	for _, s := range cfg.Upstream {
+
+	for _, s := range config.GetConfig().Upstream {
 		be := s // fix Copying the address of a loop variable in Go
 
 		backendStateRpc := BackendState{
 			Name:      s.Rpc,
-			NodeType:  GetBackendNodeType(&be),
+			NodeType:  config.GetBackendNodeType(&be),
 			LastBlock: 0,
 			Backend:   &be,
 		}
@@ -66,7 +68,7 @@ func InitPool() {
 		//
 		backendStateApi := BackendState{
 			Name:      s.Api,
-			NodeType:  GetBackendNodeType(&be),
+			NodeType:  config.GetBackendNodeType(&be),
 			LastBlock: 0,
 			Backend:   &be,
 		}
@@ -76,7 +78,7 @@ func InitPool() {
 		//
 		backendStateGrpc := BackendState{
 			Name:      s.Grpc,
-			NodeType:  GetBackendNodeType(&be),
+			NodeType:  config.GetBackendNodeType(&be),
 			LastBlock: 0,
 			Backend:   &be,
 		}
@@ -87,11 +89,11 @@ func InitPool() {
 	TaskUpdateState()
 }
 
-func SelectPrunedNode(t ProtocolType) *BackendState {
+func SelectPrunedNode(t config.ProtocolType) *BackendState {
 	pool := GetPool(t)
 
 	for _, s := range pool {
-		if s.NodeType == BackendNodeTypePruned {
+		if s.NodeType == config.BackendNodeTypePruned {
 			return s
 		}
 	}
@@ -99,31 +101,31 @@ func SelectPrunedNode(t ProtocolType) *BackendState {
 	return nil
 }
 
-func GetPool(t ProtocolType) []*BackendState {
-	if t == ProtocolTypeRpc {
+func GetPool(t config.ProtocolType) []*BackendState {
+	if t == config.ProtocolTypeRpc {
 		return PoolRpc
-	} else if t == ProtocolTypeApi {
+	} else if t == config.ProtocolTypeApi {
 		return PoolApi
-	} else if t == ProtocolTypeGrpc {
+	} else if t == config.ProtocolTypeGrpc {
 		return PoolGrpc
 	}
 
 	return nil
 }
 
-func SelectMatchedBackend(height int64, t ProtocolType) (*BackendState, error) {
+func SelectMatchedBackend(height int64, t config.ProtocolType) (*BackendState, error) {
 	pool := GetPool(t)
 
 	for _, s := range pool {
 		//fmt.Printf("debug: %+v\n", s)
-		if s.NodeType == BackendNodeTypePruned {
+		if s.NodeType == config.BackendNodeTypePruned {
 			if s.LastBlock > 0 { // fetched last block
 				earliestHeight := s.LastBlock - s.Backend.Blocks[0]
 				if height >= earliestHeight {
 					return s, nil
 				}
 			}
-		} else if s.NodeType == BackendNodeTypeSubNode {
+		} else if s.NodeType == config.BackendNodeTypeSubNode {
 			if height >= s.Backend.Blocks[0] {
 				if s.Backend.Blocks[1] == 0 { // to the newest block
 					return s, nil
@@ -131,7 +133,7 @@ func SelectMatchedBackend(height int64, t ProtocolType) (*BackendState, error) {
 					return s, nil
 				}
 			}
-		} else if s.NodeType == BackendNodeTypeArchive {
+		} else if s.NodeType == config.BackendNodeTypeArchive {
 			return s, nil
 		}
 	}
@@ -140,7 +142,7 @@ func SelectMatchedBackend(height int64, t ProtocolType) (*BackendState, error) {
 }
 
 func IsNeededToFetchLastBlock(s *BackendState) bool {
-	return s.NodeType == BackendNodeTypePruned
+	return s.NodeType == config.BackendNodeTypePruned
 
 	//if (s.NodeType == BackendNodeTypePruned) || (s.NodeType == BackendNodeTypeArchive) {
 	//	return true

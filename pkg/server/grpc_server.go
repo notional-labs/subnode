@@ -1,10 +1,11 @@
-package internal
+package server
 
 import (
 	"context"
 	"crypto/tls"
 	"fmt"
 	"github.com/mwitkow/grpc-proxy/proxy"
+	"github.com/notional-labs/subnode/pkg/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -27,7 +28,7 @@ func StartGrpcServer() {
 		md, ok := metadata.FromIncomingContext(ctx)
 		outCtx := metadata.NewOutgoingContext(ctx, md.Copy()) // Copy the inbound metadata explicitly.
 		if ok {
-			prunedNode := SelectPrunedNode(ProtocolTypeGrpc)
+			prunedNode := SelectPrunedNode(config.ProtocolTypeGrpc)
 			selectedHost := prunedNode.Backend.Grpc // default to pruned node
 
 			// Decide on which backend to dial
@@ -41,7 +42,7 @@ func StartGrpcServer() {
 					return nil, nil, status.Errorf(codes.InvalidArgument, "Invalid x-cosmos-block-height")
 				}
 
-				node, err := SelectMatchedBackend(height, ProtocolTypeGrpc)
+				node, err := SelectMatchedBackend(height, config.ProtocolTypeGrpc)
 				if err != nil {
 					return nil, nil, status.Errorf(codes.InvalidArgument, "Invalid x-cosmos-block-height")
 				}

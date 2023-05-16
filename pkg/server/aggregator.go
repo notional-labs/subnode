@@ -1,15 +1,17 @@
-package internal
+package server
 
 import (
 	"encoding/json"
+	"github.com/notional-labs/subnode/pkg/config"
+	"github.com/notional-labs/subnode/pkg/utils"
 	"github.com/tidwall/sjson"
 	"net/http"
 )
 
 func DoAggeratorUriOverHttp_status(w http.ResponseWriter, strQuery string) {
-	prunedNode := SelectPrunedNode(ProtocolTypeRpc)
+	prunedNode := SelectPrunedNode(config.ProtocolTypeRpc)
 	rpcUrl := prunedNode.Backend.Rpc + "/status?" + strQuery
-	body, err := FetchUriOverHttp(rpcUrl)
+	body, err := utils.FetchUriOverHttp(rpcUrl)
 	if err != nil {
 		SendError(w)
 		return
@@ -49,7 +51,7 @@ func DoAggeratorUriOverHttp_status(w http.ResponseWriter, strQuery string) {
 func DoAggeratorJsonRpcOverHttp_block_search(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc
-		body, err := FetchJsonRpcOverHttp(rpcUrl, jsonBody)
+		body, err := utils.FetchJsonRpcOverHttp(rpcUrl, jsonBody)
 		if err == nil {
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
@@ -77,7 +79,7 @@ func DoAggeratorJsonRpcOverHttp_block_search(w http.ResponseWriter, jsonBody []b
 func DoAggeratorJsonRpcOverHttp_tx(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc
-		body, err := FetchJsonRpcOverHttp(rpcUrl, jsonBody)
+		body, err := utils.FetchJsonRpcOverHttp(rpcUrl, jsonBody)
 		if err == nil {
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
@@ -103,7 +105,7 @@ func DoAggeratorJsonRpcOverHttp_tx(w http.ResponseWriter, jsonBody []byte) {
 func DoAggeratorJsonRpcOverHttp_block_by_hash(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc
-		body, err := FetchJsonRpcOverHttp(rpcUrl, jsonBody)
+		body, err := utils.FetchJsonRpcOverHttp(rpcUrl, jsonBody)
 		if err == nil {
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
@@ -129,7 +131,7 @@ func DoAggeratorJsonRpcOverHttp_block_by_hash(w http.ResponseWriter, jsonBody []
 func DoAggeratorJsonRpcOverHttp_tx_search(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc
-		body, err := FetchJsonRpcOverHttp(rpcUrl, jsonBody)
+		body, err := utils.FetchJsonRpcOverHttp(rpcUrl, jsonBody)
 		if err == nil {
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
@@ -157,7 +159,7 @@ func DoAggeratorJsonRpcOverHttp_tx_search(w http.ResponseWriter, jsonBody []byte
 func DoAggeratorUriOverHttp_tx(w http.ResponseWriter, strQuery string) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/tx?" + strQuery
-		body, err := FetchUriOverHttp(rpcUrl)
+		body, err := utils.FetchUriOverHttp(rpcUrl)
 		if err == nil {
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
@@ -183,7 +185,7 @@ func DoAggeratorUriOverHttp_tx(w http.ResponseWriter, strQuery string) {
 func DoAggeratorUriOverHttp_block_by_hash(w http.ResponseWriter, strQuery string) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/block_by_hash?" + strQuery
-		body, err := FetchUriOverHttp(rpcUrl)
+		body, err := utils.FetchUriOverHttp(rpcUrl)
 		if err == nil {
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
@@ -209,7 +211,7 @@ func DoAggeratorUriOverHttp_block_by_hash(w http.ResponseWriter, strQuery string
 func DoAggeratorUriOverHttp_block_search(w http.ResponseWriter, strQuery string) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/block_search?" + strQuery
-		body, err := FetchUriOverHttp(rpcUrl)
+		body, err := utils.FetchUriOverHttp(rpcUrl)
 		if err == nil {
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
@@ -237,7 +239,7 @@ func DoAggeratorUriOverHttp_block_search(w http.ResponseWriter, strQuery string)
 func DoAggeratorUriOverHttp_tx_search(w http.ResponseWriter, strQuery string) {
 	for i, s := range PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/tx_search?" + strQuery
-		body, err := FetchUriOverHttp(rpcUrl)
+		body, err := utils.FetchUriOverHttp(rpcUrl)
 		if err == nil {
 			var j0 interface{}
 			err = json.Unmarshal(body, &j0)
