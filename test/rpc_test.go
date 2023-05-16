@@ -59,3 +59,20 @@ func (s *RpcTestSuite) TestRpc_block() {
 	hash := gojsonq.New().FromString(string(body)).Find("result.block_id.hash")
 	s.True(len(hash.(string)) == 64)
 }
+
+func (s *RpcTestSuite) TestRpc_block_by_hash() {
+	// {"jsonrpc":"2.0","id":-1,"result":{"block_id":{"hash":"1FD08E9E72D3A19FA6A4F48F88026D8B74D594C3C7EE10B26A1E268E93043BA4","...
+
+	// get hash from last block first
+	rpcUrl := s.UrlEndpoint + "/block?"
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+	hash := gojsonq.New().FromString(string(body)).Find("result.block_id.hash")
+
+	rpcUrl = s.UrlEndpoint + "/block_by_hash?hash=0x" + hash.(string)
+	body, err = sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	hash2 := gojsonq.New().FromString(string(body)).Find("result.block_id.hash")
+	s.Equal(hash, hash2)
+}
