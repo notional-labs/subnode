@@ -242,3 +242,24 @@ func (s *RpcTestSuite) TestRpc_dump_consensus_state() {
 	s.NoError(err)
 	s.True(height > 0)
 }
+
+// skip as /genesis is blocked
+func (s *RpcTestSuite) TestRpc_genesis() {
+}
+
+// skip as /genesis_chunked is blocked
+func (s *RpcTestSuite) TestRpc_genesis_chunked() {
+}
+
+func (s *RpcTestSuite) TestRpc_health() {
+	// {"jsonrpc":"2.0","id":-1,"result":{}}
+
+	rpcUrl := s.UrlEndpoint + "/health?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_jsonrpc := gojsonq.New().FromString(string(body)).Find("jsonrpc")
+	s.NoError(err)
+	s.True(v_jsonrpc.(string) == "2.0")
+}
