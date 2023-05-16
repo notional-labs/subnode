@@ -213,3 +213,26 @@ func (s *RpcTestSuite) TestRpc_consensus_params() {
 	s.NoError(err)
 	s.True(height > 0)
 }
+
+func (s *RpcTestSuite) TestRpc_consensus_state() {
+	//{
+	//  "jsonrpc": "2.0",
+	//  "id": -1,
+	//  "result": {
+	//    "round_state": {
+	//      "height/round/step": "9654436/0/3",
+	//      "start_time": "2023-05-16T15:02:41.933248936Z",
+	//      "proposal_block_hash": "",
+	//      "locked_block_hash": "",
+	//      "valid_block_hash": "",
+	//      "height_vote_set": [
+
+	rpcUrl := s.UrlEndpoint + "/consensus_state?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_addr := gojsonq.New().FromString(string(body)).Find("result.round_state.proposer.address")
+	s.NoError(err)
+	s.True(len(v_addr.(string)) == 40)
+}
