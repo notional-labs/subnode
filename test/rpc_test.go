@@ -15,6 +15,10 @@ type RpcTestSuite struct {
 	UrlEndpoint string
 }
 
+func (s *RpcTestSuite) SetupSuite() {
+	s.UrlEndpoint = "https://rpc-osmosis-sub.cosmosia.notional.ventures"
+}
+
 func (s *RpcTestSuite) SetupTest() {
 	s.UrlEndpoint = "https://rpc-osmosis-sub.cosmosia.notional.ventures"
 	time.Sleep(1 * time.Second)
@@ -328,4 +332,40 @@ func (s *RpcTestSuite) TestRpc_status() {
 	latest_block_height, err := strconv.ParseInt(v_latest_block_height.(string), 10, 64)
 	s.NoError(err)
 	s.True(latest_block_height > 0)
+}
+
+func (s *RpcTestSuite) TestRpc_tx() {
+	//{
+	//  "jsonrpc": "2.0",
+	//  "id": -1,
+	//  "result": {
+	//    "hash": "7E651387114BCFAAC7AA9A49489C39D6D7D3EB7272025D973EC6E58C02A6B849",
+	//    "height": "9657343",
+
+	rpcUrl := s.UrlEndpoint + "/tx?hash=0x7E651387114BCFAAC7AA9A49489C39D6D7D3EB7272025D973EC6E58C02A6B849&prove=true"
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_hash := gojsonq.New().FromString(string(body)).Find("result.hash")
+	s.True(len(v_hash.(string)) == 64)
+}
+
+func (s *RpcTestSuite) TestRpc_tx_search() {
+	//{
+	//  "jsonrpc": "2.0",
+	//  "id": -1,
+	//  "result": {
+	//    "txs": [
+	//      {
+	//        "hash": "474882D59D192FB7825868511E3478197FD18C45EC2002CC75169D04B8CDE1D6",
+	//        "height": "9657343",
+
+	rpcUrl := s.UrlEndpoint + "/tx_search?query=\"tx.height=9657343\"&prove=false&page=1&per_page=1&order_by=\"asc\""
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_height := gojsonq.New().FromString(string(body)).Find("result.txs.[0].height")
+	height, err := strconv.ParseInt(v_height.(string), 10, 64)
+	s.NoError(err)
+	s.True(height > 0)
 }
