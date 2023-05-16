@@ -263,3 +263,17 @@ func (s *RpcTestSuite) TestRpc_health() {
 	s.NoError(err)
 	s.True(v_jsonrpc.(string) == "2.0")
 }
+
+func (s *RpcTestSuite) TestRpc_net_info() {
+	// {"jsonrpc":"2.0","id":-1,"result":{"listening":true,"listeners":["Listener(@)"],"n_peers":"133",...
+
+	rpcUrl := s.UrlEndpoint + "/net_info?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_n_peers := gojsonq.New().FromString(string(body)).Find("result.n_peers")
+	n_peers, err := strconv.ParseInt(v_n_peers.(string), 10, 64)
+	s.NoError(err)
+	s.True(n_peers >= 0)
+}
