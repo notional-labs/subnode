@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/notional-labs/subnode/pkg/config"
+	"github.com/notional-labs/subnode/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"

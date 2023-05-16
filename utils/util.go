@@ -64,3 +64,15 @@ func FetchJsonRpcOverHttp(url string, jsonBody []byte) ([]byte, error) {
 
 	return body, nil
 }
+
+func SendError(w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "text/html")
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write([]byte("Oops! Something was wrong"))
+}
+
+func SendResult(w http.ResponseWriter, body []byte) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(body)
+}

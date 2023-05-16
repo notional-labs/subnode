@@ -1,10 +1,10 @@
-package server
+package state
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/notional-labs/subnode/pkg/config"
+	"github.com/notional-labs/subnode/config"
 	"io"
 	"net/http"
 	"net/http/httputil"

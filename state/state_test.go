@@ -1,7 +1,7 @@
-package server
+package state
 
 import (
-	"github.com/notional-labs/subnode/pkg/config"
+	"github.com/notional-labs/subnode/config"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

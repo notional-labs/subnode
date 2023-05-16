@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/notional-labs/subnode/pkg/config"
+	"github.com/notional-labs/subnode/config"
+	"github.com/notional-labs/subnode/state"
+	"github.com/notional-labs/subnode/utils"
 	"log"
 	"net/http"
 	"strconv"
@@ -13,7 +15,7 @@ var apiServer *http.Server
 
 func StartApiServer() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		prunedNode := SelectPrunedNode(config.ProtocolTypeApi)
+		prunedNode := state.SelectPrunedNode(config.ProtocolTypeApi)
 		selectedHost := prunedNode.Backend.Api // default to pruned node
 
 		if r.Method == "GET" {
@@ -23,12 +25,12 @@ func StartApiServer() {
 			if xCosmosBlockHeight != "" {
 				height, err := strconv.ParseInt(xCosmosBlockHeight, 10, 64)
 				if err != nil {
-					SendError(w)
+					utils.SendError(w)
 				}
 
-				node, err := SelectMatchedBackend(height, config.ProtocolTypeApi)
+				node, err := state.SelectMatchedBackend(height, config.ProtocolTypeApi)
 				if err != nil {
-					SendError(w)
+					utils.SendError(w)
 				}
 
 				selectedHost = node.Backend.Api
@@ -37,13 +39,13 @@ func StartApiServer() {
 			}
 
 			r.Host = r.URL.Host
-			ProxyMapApi[selectedHost].ServeHTTP(w, r)
+			state.ProxyMapApi[selectedHost].ServeHTTP(w, r)
 		} else if r.Method == "POST" {
 			selectedHost = prunedNode.Backend.Api
 			r.Host = r.URL.Host
-			ProxyMapApi[selectedHost].ServeHTTP(w, r)
+			state.ProxyMapApi[selectedHost].ServeHTTP(w, r)
 		} else {
-			SendError(w)
+			utils.SendError(w)
 		}
 	}
 	// handle all requests to your server using the proxy

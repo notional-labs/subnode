@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/notional-labs/subnode/pkg/server"
+	"github.com/notional-labs/subnode/server"
 	"github.com/spf13/cobra"
 )
 

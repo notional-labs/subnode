@@ -1,8 +1,8 @@
-package server
+package aggerator
 
 import (
 	"fmt"
-	"github.com/notional-labs/subnode/pkg/utils"
+	"github.com/notional-labs/subnode/utils"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

@@ -1,7 +1,9 @@
 package server
 
+import "github.com/notional-labs/subnode/state"
+
 func Start() error {
-	Init()
+	state.Init()
 	StartRpcServer()
 	StartApiServer()
 	StartGrpcServer()

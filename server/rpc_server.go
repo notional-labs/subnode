@@ -5,7 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/notional-labs/subnode/pkg/config"
+	"github.com/notional-labs/subnode/aggerator"
+	"github.com/notional-labs/subnode/config"
+	"github.com/notional-labs/subnode/state"
+	"github.com/notional-labs/subnode/utils"
 	"io"
 	"log"
 	"net/http"
@@ -16,7 +19,7 @@ import (
 var rpcServer *http.Server
 
 func uriOverHttp(w http.ResponseWriter, r *http.Request) {
-	prunedNode := SelectPrunedNode(config.ProtocolTypeRpc)
+	prunedNode := state.SelectPrunedNode(config.ProtocolTypeRpc)
 	selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
 	fmt.Printf("r.RequestURI=%s\n", r.RequestURI)
@@ -47,13 +50,13 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		if heightParam != "" {
 			height, err := strconv.ParseInt(heightParam, 10, 64)
 			if err != nil {
-				SendError(w)
+				utils.SendError(w)
 				return
 			}
 
-			node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
+			node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 			if err != nil {
-				SendError(w)
+				utils.SendError(w)
 				return
 			}
 
@@ -66,13 +69,13 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		if heightParam != "" {
 			height, err := strconv.ParseInt(heightParam, 10, 64)
 			if err != nil {
-				SendError(w)
+				utils.SendError(w)
 				return
 			}
 
-			node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
+			node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 			if err != nil {
-				SendError(w)
+				utils.SendError(w)
 				return
 			}
 
@@ -85,34 +88,34 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		//fmt.Printf("query=%s", strQuery)
 
 		if strings.HasPrefix(r.RequestURI, "/status") {
-			DoAggeratorUriOverHttp_status(w, strQuery)
+			aggerator.DoAggeratorUriOverHttp_status(w, strQuery)
 			return
 		} else if strings.HasPrefix(r.RequestURI, "/tx_search") {
-			DoAggeratorUriOverHttp_tx_search(w, strQuery)
+			aggerator.DoAggeratorUriOverHttp_tx_search(w, strQuery)
 			return
 		} else if strings.HasPrefix(r.RequestURI, "/block_by_hash") {
-			DoAggeratorUriOverHttp_block_by_hash(w, strQuery)
+			aggerator.DoAggeratorUriOverHttp_block_by_hash(w, strQuery)
 			return
 		} else if strings.HasPrefix(r.RequestURI, "/tx") {
-			DoAggeratorUriOverHttp_tx(w, strQuery)
+			aggerator.DoAggeratorUriOverHttp_tx(w, strQuery)
 			return
 		} else if strings.HasPrefix(r.RequestURI, "/block_search") {
-			DoAggeratorUriOverHttp_block_search(w, strQuery)
+			aggerator.DoAggeratorUriOverHttp_block_search(w, strQuery)
 			return
 		}
 	}
 
 	r.Host = r.URL.Host
-	ProxyMapRpc[selectedHost].ServeHTTP(w, r)
+	state.ProxyMapRpc[selectedHost].ServeHTTP(w, r)
 }
 
 func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
-	prunedNode := SelectPrunedNode(config.ProtocolTypeRpc)
+	prunedNode := state.SelectPrunedNode(config.ProtocolTypeRpc)
 	selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		SendError(w)
+		utils.SendError(w)
 		return
 	}
 
@@ -121,7 +124,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 	var j0 interface{}
 	err = json.Unmarshal(body, &j0)
 	if err != nil {
-		SendError(w)
+		utils.SendError(w)
 		return
 	}
 
@@ -162,14 +165,14 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
 					// height is 1st param
 					if len(positionalParams) < 1 {
-						SendError(w)
+						utils.SendError(w)
 						return
 					}
 
 					if heightParam, ok := positionalParams[0].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							SendError(w)
+							utils.SendError(w)
 							return
 						}
 					}
@@ -177,16 +180,16 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					if heightParam, ok := namedParams["height"].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							SendError(w)
+							utils.SendError(w)
 							return
 						}
 					}
 				}
 
 				if height >= 0 {
-					node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
+					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 					if err != nil {
-						SendError(w)
+						utils.SendError(w)
 						return
 					}
 
@@ -198,14 +201,14 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
 					// maxHeight is 2nd param
 					if len(positionalParams) < 2 {
-						SendError(w)
+						utils.SendError(w)
 						return
 					}
 
 					if heightParam, ok := positionalParams[1].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							SendError(w)
+							utils.SendError(w)
 							return
 						}
 					}
@@ -213,16 +216,16 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					if heightParam, ok := namedParams["maxHeight"].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							SendError(w)
+							utils.SendError(w)
 							return
 						}
 					}
 				}
 
 				if height >= 0 {
-					node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
+					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 					if err != nil {
-						SendError(w)
+						utils.SendError(w)
 						return
 					}
 
@@ -234,14 +237,14 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
 					// height is 3rd param
 					if len(positionalParams) < 3 {
-						SendError(w)
+						utils.SendError(w)
 						return
 					}
 
 					if heightParam, ok := positionalParams[2].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							SendError(w)
+							utils.SendError(w)
 							return
 						}
 					}
@@ -249,32 +252,32 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					if heightParam, ok := namedParams["height"].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							SendError(w)
+							utils.SendError(w)
 							return
 						}
 					}
 				}
 
 				if height >= 0 {
-					node, err := SelectMatchedBackend(height, config.ProtocolTypeRpc)
+					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 					if err != nil {
-						SendError(w)
+						utils.SendError(w)
 						return
 					}
 					selectedHost = node.Backend.Rpc
 				}
 			} else { // try to support partially for other methods
 				if method == "tx_search" {
-					DoAggeratorJsonRpcOverHttp_tx_search(w, body)
+					aggerator.DoAggeratorJsonRpcOverHttp_tx_search(w, body)
 					return
 				} else if method == "block_by_hash" {
-					DoAggeratorJsonRpcOverHttp_block_by_hash(w, body)
+					aggerator.DoAggeratorJsonRpcOverHttp_block_by_hash(w, body)
 					return
 				} else if method == "tx" {
-					DoAggeratorJsonRpcOverHttp_tx(w, body)
+					aggerator.DoAggeratorJsonRpcOverHttp_tx(w, body)
 					return
 				} else if method == "block_search" {
-					DoAggeratorJsonRpcOverHttp_block_search(w, body)
+					aggerator.DoAggeratorJsonRpcOverHttp_block_search(w, body)
 					return
 				}
 			}
@@ -283,7 +286,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 
 	r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
 	r.Host = r.URL.Host
-	ProxyMapRpc[selectedHost].ServeHTTP(w, r)
+	state.ProxyMapRpc[selectedHost].ServeHTTP(w, r)
 }
 
 func StartRpcServer() {
@@ -295,7 +298,7 @@ func StartRpcServer() {
 		} else if r.Method == "POST" { // JSONRPC over HTTP
 			jsonRpcOverHttp(w, r)
 		} else {
-			SendError(w)
+			utils.SendError(w)
 			return
 		}
 	}
@@ -316,16 +319,4 @@ func ShutdownRpcServer() {
 	if err := rpcServer.Shutdown(context.Background()); err != nil {
 		log.Printf("rpcServer Shutdown: %v", err)
 	}
-}
-
-func SendError(w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "text/html")
-	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte("Oops! Something was wrong"))
-}
-
-func SendResult(w http.ResponseWriter, body []byte) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write(body)
 }
