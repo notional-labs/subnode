@@ -89,3 +89,15 @@ func (s *RpcTestSuite) TestRpc_block_results() {
 	s.NoError(err)
 	s.True(height > 0)
 }
+
+func (s *RpcTestSuite) TestRpc_block_search() {
+	// {"jsonrpc":"2.0","id":-1,"result":{"blocks":[{"block_id":{"hash":"D9CE09E9B332C4374FD03EAE5211AA306A87A14BD74E99785515A79B3C5057F7"...
+	rpcUrl := s.UrlEndpoint + "/block_search?query=\"block.height%20>%201\"&page=1&per_page=1&order_by=\"asc\"&match_events=true"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_hash := gojsonq.New().FromString(string(body)).Find("result.blocks.[0].block_id.hash")
+	s.True(len(v_hash.(string)) == 64)
+
+}
