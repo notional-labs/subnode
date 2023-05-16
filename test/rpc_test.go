@@ -277,3 +277,17 @@ func (s *RpcTestSuite) TestRpc_net_info() {
 	s.NoError(err)
 	s.True(n_peers >= 0)
 }
+
+func (s *RpcTestSuite) TestRpc_num_unconfirmed_txs() {
+	// {"jsonrpc":"2.0","id":-1,"result":{"n_txs":"6","total":"6","total_bytes":"2378","txs":null}}
+
+	rpcUrl := s.UrlEndpoint + "/num_unconfirmed_txs?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_n_txs := gojsonq.New().FromString(string(body)).Find("result.n_txs")
+	n_txs, err := strconv.ParseInt(v_n_txs.(string), 10, 64)
+	s.NoError(err)
+	s.True(n_txs >= 0)
+}
