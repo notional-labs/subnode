@@ -27,7 +27,6 @@ func TestRpcTestSuite(t *testing.T) {
 func (s *RpcTestSuite) TestRpc_abci_info() {
 	// {"jsonrpc":"2.0","id":-1,"result":{"response":{"data":"OsmosisApp","app_version":"15","last_block_height":"9647581","last_block_app_hash":"dc6xiKez6O+kQ67w2Qh4/sR3PsbhDcrJScqtbSDQXR4="}}}
 	rpcUrl := s.UrlEndpoint + "/abci_info?"
-
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
@@ -40,7 +39,6 @@ func (s *RpcTestSuite) TestRpc_abci_info() {
 func (s *RpcTestSuite) TestRpc_abci_query() {
 	// {"jsonrpc":"2.0","id":-1,"result":{"response":{"code":0,"log":"","info":"","index":"0","key":null,"value":"","proofOps":null,"height":"9650945","codespace":"sdk"}}}
 	rpcUrl := s.UrlEndpoint + "/abci_query?path=\"/app/version\""
-
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
@@ -53,7 +51,6 @@ func (s *RpcTestSuite) TestRpc_abci_query() {
 func (s *RpcTestSuite) TestRpc_block() {
 	// {"jsonrpc":"2.0","id":-1,"result":{"block_id":{"hash":"1FD08E9E72D3A19FA6A4F48F88026D8B74D594C3C7EE10B26A1E268E93043BA4","...
 	rpcUrl := s.UrlEndpoint + "/block?"
-
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
@@ -81,7 +78,6 @@ func (s *RpcTestSuite) TestRpc_block_by_hash() {
 func (s *RpcTestSuite) TestRpc_block_results() {
 	// {"jsonrpc":"2.0","id":-1,"result":{"height":"9651394","txs_results":[{"code":0,"data":"CiUKIy9pYmMuY29yZS5jbGllbnQudjEuTXNnVXBkYXR...
 	rpcUrl := s.UrlEndpoint + "/block_results?"
-
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
@@ -94,7 +90,6 @@ func (s *RpcTestSuite) TestRpc_block_results() {
 func (s *RpcTestSuite) TestRpc_block_search() {
 	// {"jsonrpc":"2.0","id":-1,"result":{"blocks":[{"block_id":{"hash":"D9CE09E9B332C4374FD03EAE5211AA306A87A14BD74E99785515A79B3C5057F7"...
 	rpcUrl := s.UrlEndpoint + "/block_search?query=\"block.height%20>%201\"&page=1&per_page=1&order_by=\"asc\"&match_events=true"
-
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
@@ -166,7 +161,6 @@ func (s *RpcTestSuite) TestRpc_commit() {
 	//        },
 	// ...
 	rpcUrl := s.UrlEndpoint + "/commit?"
-
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
@@ -204,7 +198,6 @@ func (s *RpcTestSuite) TestRpc_consensus_params() {
 	//}
 
 	rpcUrl := s.UrlEndpoint + "/consensus_params?"
-
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
@@ -228,11 +221,24 @@ func (s *RpcTestSuite) TestRpc_consensus_state() {
 	//      "height_vote_set": [
 
 	rpcUrl := s.UrlEndpoint + "/consensus_state?"
-
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
 	v_addr := gojsonq.New().FromString(string(body)).Find("result.round_state.proposer.address")
 	s.NoError(err)
 	s.True(len(v_addr.(string)) == 40)
+}
+
+func (s *RpcTestSuite) TestRpc_dump_consensus_state() {
+	// {"jsonrpc":"2.0","id":-1,"result":{"round_state":{"height":"9655627","round":0,"st...
+
+	rpcUrl := s.UrlEndpoint + "/dump_consensus_state?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_height := gojsonq.New().FromString(string(body)).Find("result.round_state.height")
+	height, err := strconv.ParseInt(v_height.(string), 10, 64)
+	s.NoError(err)
+	s.True(height > 0)
 }
