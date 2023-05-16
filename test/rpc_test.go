@@ -76,3 +76,16 @@ func (s *RpcTestSuite) TestRpc_block_by_hash() {
 	hash2 := gojsonq.New().FromString(string(body)).Find("result.block_id.hash")
 	s.Equal(hash, hash2)
 }
+
+func (s *RpcTestSuite) TestRpc_block_results() {
+	// {"jsonrpc":"2.0","id":-1,"result":{"height":"9651394","txs_results":[{"code":0,"data":"CiUKIy9pYmMuY29yZS5jbGllbnQudjEuTXNnVXBkYXR...
+	rpcUrl := s.UrlEndpoint + "/block_results?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_height := gojsonq.New().FromString(string(body)).Find("result.height")
+	height, err := strconv.ParseInt(v_height.(string), 10, 64)
+	s.NoError(err)
+	s.True(height > 0)
+}
