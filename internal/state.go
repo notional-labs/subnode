@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"encoding/json"
@@ -49,8 +49,6 @@ func Init() {
 }
 
 func InitPool() {
-	cfg := GetConfig()
-
 	PoolRpc = PoolRpc[:0] // Remove all elements
 	PoolApi = PoolApi[:0] // Remove all elements
 	for _, s := range cfg.Upstream {

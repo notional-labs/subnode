@@ -1,14 +1,14 @@
-package main
+package cmd
 
 import (
 	"fmt"
+	"github.com/notional-labs/subnode/internal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
 )
 
 var (
-	cfg  *Config
 	conf string // path to config file
 )
 
@@ -21,13 +21,13 @@ func NewRootCmd() *cobra.Command {
 	}
 
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {
-		c, err := LoadConfigFromFile(conf)
+		c, err := internal.LoadConfigFromFile(conf)
 		if err != nil {
 			return err
 		}
 
-		cfg = c
-		fmt.Printf("%+v\n", cfg)
+		fmt.Printf("%+v\n", c)
+		internal.SetConfig(c)
 
 		return nil
 	}
@@ -57,8 +57,4 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
-}
-
-func GetConfig() *Config {
-	return cfg
 }
