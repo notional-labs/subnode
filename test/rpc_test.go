@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	sn "github.com/notional-labs/subnode/utils"
 	"github.com/stretchr/testify/suite"
 	"github.com/thedevsaddam/gojsonq/v2"
@@ -100,4 +101,24 @@ func (s *RpcTestSuite) TestRpc_block_search() {
 	v_hash := gojsonq.New().FromString(string(body)).Find("result.blocks.[0].block_id.hash")
 	s.True(len(v_hash.(string)) == 64)
 
+}
+
+func (s *RpcTestSuite) TestRpc_blockchain() {
+	// {"jsonrpc":"2.0","id":-1,"result":{"last_height":"9652346","block_metas":[{"block_id":{"hash":"334962A99991EF83EFFBBD066A91CE5A285C45BE7714C862B0476F72BD826DBA",...
+
+	// get last_block_height first
+	rpcUrl := s.UrlEndpoint + "/block?"
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+	v_height := gojsonq.New().FromString(string(body)).Find("result.block.header.height")
+	height, err := strconv.ParseInt(v_height.(string), 10, 64)
+	s.NoError(err)
+
+	rpcUrl = fmt.Sprint(s.UrlEndpoint, "/blockchain?minHeight=", height-1, "&maxHeight=", height)
+	body, err = sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+	v_height = gojsonq.New().FromString(string(body)).Find("result.last_height")
+	height, err = strconv.ParseInt(v_height.(string), 10, 64)
+	s.NoError(err)
+	s.True(height > 0)
 }
