@@ -369,3 +369,16 @@ func (s *RpcTestSuite) TestRpc_tx_search() {
 	s.NoError(err)
 	s.True(height > 0)
 }
+
+func (s *RpcTestSuite) TestRpc_validators() {
+	// {"jsonrpc":"2.0","id":-1,"result":{"block_height":"9657919",...
+
+	rpcUrl := s.UrlEndpoint + "/validators?"
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_block_height := gojsonq.New().FromString(string(body)).Find("result.block_height")
+	block_height, err := strconv.ParseInt(v_block_height.(string), 10, 64)
+	s.NoError(err)
+	s.True(block_height > 0)
+}
