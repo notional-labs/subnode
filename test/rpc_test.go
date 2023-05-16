@@ -173,3 +173,43 @@ func (s *RpcTestSuite) TestRpc_commit() {
 	v_hash := gojsonq.New().FromString(string(body)).Find("result.signed_header.header.last_commit_hash")
 	s.True(len(v_hash.(string)) == 64)
 }
+
+func (s *RpcTestSuite) TestRpc_consensus_params() {
+	//{
+	//  "jsonrpc": "2.0",
+	//  "id": -1,
+	//  "result": {
+	//    "block_height": "9654243",
+	//    "consensus_params": {
+	//      "block": {
+	//        "max_bytes": "10485760",
+	//        "max_gas": "120000000",
+	//        "time_iota_ms": "1000"
+	//      },
+	//      "evidence": {
+	//        "max_age_num_blocks": "403200",
+	//        "max_age_duration": "1209600000000000",
+	//        "max_bytes": "1048576"
+	//      },
+	//      "validator": {
+	//        "pub_key_types": [
+	//          "ed25519"
+	//        ]
+	//      },
+	//      "version": {
+	//        "app_version": "15"
+	//      }
+	//    }
+	//  }
+	//}
+
+	rpcUrl := s.UrlEndpoint + "/consensus_params?"
+
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+
+	v_height := gojsonq.New().FromString(string(body)).Find("result.block_height")
+	height, err := strconv.ParseInt(v_height.(string), 10, 64)
+	s.NoError(err)
+	s.True(height > 0)
+}
