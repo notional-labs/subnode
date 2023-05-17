@@ -9,6 +9,10 @@ build:
 	@echo "Building subnode"
 	@go build -mod readonly $(BUILD_FLAGS) -o build/subnode main.go
 
+test:
+	@echo "Testing subnode"
+	@go test -mod readonly $(BUILD_FLAGS) ./...
+
 install:
 	@echo "Installing subnode"
 	@go install -mod readonly $(BUILD_FLAGS) ./...

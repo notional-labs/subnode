@@ -16,9 +16,11 @@ func TestSelectPrunedNode(t *testing.T) {
 		Blocks: []int64{},
 	}
 
-	config.cfg = &config.Config{
+	cfg := &config.Config{
 		Upstream: []config.Backend{pruned, archive},
 	}
+
+	config.SetConfig(cfg)
 
 	InitPool()
 
