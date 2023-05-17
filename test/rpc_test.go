@@ -2,6 +2,8 @@ package test
 
 import (
 	"fmt"
+	"github.com/notional-labs/subnode/config"
+	"github.com/notional-labs/subnode/server"
 	sn "github.com/notional-labs/subnode/utils"
 	"github.com/stretchr/testify/suite"
 	"github.com/thedevsaddam/gojsonq/v2"
@@ -16,11 +18,26 @@ type RpcTestSuite struct {
 }
 
 func (s *RpcTestSuite) SetupSuite() {
-	s.UrlEndpoint = "https://rpc-osmosis-sub.cosmosia.notional.ventures"
+	go func() {
+		conf := "../subnode.yaml"
+		c, err := config.LoadConfigFromFile(conf)
+		s.NoError(err)
+		fmt.Printf("%+v\n", c)
+		config.SetConfig(c)
+		server.Start()
+	}()
+
+	// wait few secs for the server to init
+	time.Sleep(5 * time.Second)
+
+	s.UrlEndpoint = "http://localhost:26657"
+}
+
+func (s *RpcTestSuite) TearDownTest() {
+	server.Shutdown()
 }
 
 func (s *RpcTestSuite) SetupTest() {
-	s.UrlEndpoint = "https://rpc-osmosis-sub.cosmosia.notional.ventures"
 	time.Sleep(1 * time.Second)
 }
 
