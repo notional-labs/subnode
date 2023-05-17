@@ -22,7 +22,7 @@ func (s *RpcTestSuite) SetupSuite() {
 		conf := "../subnode.yaml"
 		c, err := config.LoadConfigFromFile(conf)
 		s.NoError(err)
-		fmt.Printf("%+v\n", c)
+		//fmt.Printf("%+v\n", c)
 		config.SetConfig(c)
 		server.Start()
 	}()
@@ -33,8 +33,8 @@ func (s *RpcTestSuite) SetupSuite() {
 	s.UrlEndpoint = "http://localhost:26657"
 }
 
-func (s *RpcTestSuite) TearDownTest() {
-	server.Shutdown()
+func (s *RpcTestSuite) TearDownSuite() {
+	//server.Shutdown()
 }
 
 func (s *RpcTestSuite) SetupTest() {
