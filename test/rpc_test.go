@@ -2,8 +2,6 @@ package test
 
 import (
 	"fmt"
-	"github.com/notional-labs/subnode/config"
-	"github.com/notional-labs/subnode/server"
 	sn "github.com/notional-labs/subnode/utils"
 	"github.com/stretchr/testify/suite"
 	"github.com/thedevsaddam/gojsonq/v2"
@@ -12,20 +10,17 @@ import (
 	"time"
 )
 
+func TestRpcTestSuite(t *testing.T) {
+	suite.Run(t, new(RpcTestSuite))
+}
+
 type RpcTestSuite struct {
 	suite.Suite
 	UrlEndpoint string
 }
 
 func (s *RpcTestSuite) SetupSuite() {
-	go func() {
-		conf := "../subnode.yaml"
-		c, err := config.LoadConfigFromFile(conf)
-		s.NoError(err)
-		//fmt.Printf("%+v\n", c)
-		config.SetConfig(c)
-		server.Start()
-	}()
+	go startServer()
 
 	// wait few secs for the server to init
 	time.Sleep(5 * time.Second)
@@ -39,20 +34,6 @@ func (s *RpcTestSuite) TearDownSuite() {
 
 func (s *RpcTestSuite) SetupTest() {
 	time.Sleep(1 * time.Second)
-}
-
-func TestRpcTestSuite(t *testing.T) {
-	suite.Run(t, new(RpcTestSuite))
-}
-
-func (s *RpcTestSuite) getNetworkName() string {
-	rpcUrl := s.UrlEndpoint + "/status?"
-	body, err := sn.FetchUriOverHttp(rpcUrl)
-	s.NoError(err)
-	v_network := gojsonq.New().FromString(string(body)).Find("result.node_info.network")
-	network := v_network.(string)
-	s.True(len(network) > 0)
-	return network
 }
 
 func (s *RpcTestSuite) TestRpc_abci_info() {
@@ -370,7 +351,7 @@ func (s *RpcTestSuite) TestRpc_tx() {
 	//    "height": "9657343",
 
 	// figure out which chain running test on
-	network := s.getNetworkName()
+	network := getNetworkName()
 	tx_hash := ""
 	if network == "osmosis-1" {
 		tx_hash = "0x7E651387114BCFAAC7AA9A49489C39D6D7D3EB7272025D973EC6E58C02A6B849"
@@ -396,7 +377,7 @@ func (s *RpcTestSuite) TestRpc_tx_search() {
 	//        "height": "9657343",
 
 	// figure out which chain running test on
-	network := s.getNetworkName()
+	network := getNetworkName()
 	block_num_test := 0
 	if network == "osmosis-1" {
 		block_num_test = 9657343
