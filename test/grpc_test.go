@@ -7,6 +7,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"testing"
 	"time"
 )
@@ -62,7 +63,7 @@ func (s *GrpcTestSuite) TestGrpc_GetBalance() {
 	// Create a connection to the gRPC server.
 	grpcConn, err := grpc.Dial(
 		s.UrlEndpoint,
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(grpc.ForceCodec(codec.NewProtoCodec(nil).GRPCCodec())),
 	)
 	s.NoError(err)
