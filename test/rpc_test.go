@@ -23,7 +23,7 @@ func (s *RpcTestSuite) SetupSuite() {
 	go startServer()
 
 	// wait few secs for the server to init
-	time.Sleep(5 * time.Second)
+	time.Sleep(15 * time.Second)
 
 	s.UrlEndpoint = "http://localhost:26657"
 }
