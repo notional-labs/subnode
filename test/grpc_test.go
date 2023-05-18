@@ -27,17 +27,7 @@ func (s *GrpcTestSuite) SetupSuite() {
 	time.Sleep(5 * time.Second)
 
 	s.UrlEndpoint = "localhost:9090"
-}
 
-func (s *GrpcTestSuite) TearDownSuite() {
-	//server.Shutdown()
-}
-
-func (s *GrpcTestSuite) SetupTest() {
-	time.Sleep(1 * time.Second)
-}
-
-func (s *GrpcTestSuite) TestGrpc_GetBalance() {
 	const Bech32PrefixAccAddr = "osmo"
 	var (
 		// Bech32PrefixAccPub defines the Bech32 prefix of an account's public key.
@@ -55,7 +45,17 @@ func (s *GrpcTestSuite) TestGrpc_GetBalance() {
 	config.SetBech32PrefixForAccount(Bech32PrefixAccAddr, Bech32PrefixAccPub)
 	//config.SetBech32PrefixForValidator(Bech32PrefixValAddr, Bech32PrefixValPub)
 	//config.SetBech32PrefixForConsensusNode(Bech32PrefixConsAddr, Bech32PrefixConsPub)
+}
 
+func (s *GrpcTestSuite) TearDownSuite() {
+	//server.Shutdown()
+}
+
+func (s *GrpcTestSuite) SetupTest() {
+	time.Sleep(1 * time.Second)
+}
+
+func (s *GrpcTestSuite) TestGrpc_GetBalance() {
 	myAddress, err := sdk.AccAddressFromBech32("osmo1083svrca4t350mphfv9x45wq9asrs60cq5yv9n")
 	s.NoError(err)
 
