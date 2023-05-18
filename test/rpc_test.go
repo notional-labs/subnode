@@ -45,6 +45,16 @@ func TestRpcTestSuite(t *testing.T) {
 	suite.Run(t, new(RpcTestSuite))
 }
 
+func (s *RpcTestSuite) getNetworkName() string {
+	rpcUrl := s.UrlEndpoint + "/status?"
+	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+	v_network := gojsonq.New().FromString(string(body)).Find("result.node_info.network")
+	network := v_network.(string)
+	s.True(len(network) > 0)
+	return network
+}
+
 func (s *RpcTestSuite) TestRpc_abci_info() {
 	// {"jsonrpc":"2.0","id":-1,"result":{"response":{"data":"OsmosisApp","app_version":"15","last_block_height":"9647581","last_block_app_hash":"dc6xiKez6O+kQ67w2Qh4/sR3PsbhDcrJScqtbSDQXR4="}}}
 	rpcUrl := s.UrlEndpoint + "/abci_info?"
@@ -359,7 +369,15 @@ func (s *RpcTestSuite) TestRpc_tx() {
 	//    "hash": "7E651387114BCFAAC7AA9A49489C39D6D7D3EB7272025D973EC6E58C02A6B849",
 	//    "height": "9657343",
 
-	rpcUrl := s.UrlEndpoint + "/tx?hash=0x7E651387114BCFAAC7AA9A49489C39D6D7D3EB7272025D973EC6E58C02A6B849&prove=true"
+	// figure out which chain running test on
+	network := s.getNetworkName()
+	tx_hash := ""
+	if network == "osmosis-1" {
+		tx_hash = "0x7E651387114BCFAAC7AA9A49489C39D6D7D3EB7272025D973EC6E58C02A6B849"
+	}
+	s.True(len(tx_hash) > 0)
+
+	rpcUrl := fmt.Sprint(s.UrlEndpoint, "/tx?hash=", tx_hash, "&prove=true")
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
@@ -377,7 +395,15 @@ func (s *RpcTestSuite) TestRpc_tx_search() {
 	//        "hash": "474882D59D192FB7825868511E3478197FD18C45EC2002CC75169D04B8CDE1D6",
 	//        "height": "9657343",
 
-	rpcUrl := s.UrlEndpoint + "/tx_search?query=\"tx.height=9657343\"&prove=false&page=1&per_page=1&order_by=\"asc\""
+	// figure out which chain running test on
+	network := s.getNetworkName()
+	block_num_test := 0
+	if network == "osmosis-1" {
+		block_num_test = 9657343
+	}
+	s.True(block_num_test > 0)
+
+	rpcUrl := fmt.Sprint(s.UrlEndpoint, "/tx_search?query=\"tx.height=", block_num_test, "\"&prove=false&page=1&per_page=1&order_by=\"asc\"")
 	body, err := sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
