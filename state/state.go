@@ -203,7 +203,7 @@ func doUpdateState() {
 
 func FetchHeightFromStatus(rpcUrl string) (int64, error) {
 	urlRequest := rpcUrl + "/status"
-	spaceClient := http.Client{Timeout: time.Second * 10}
+	spaceClient := http.Client{Timeout: time.Second * 30}
 
 	req, err := http.NewRequest(http.MethodGet, urlRequest, nil)
 	if err != nil {
