@@ -13,6 +13,10 @@ test:
 	@echo "Testing subnode"
 	@go test -mod readonly $(BUILD_FLAGS) ./...
 
+lint:
+	@echo "Run golangci-lint"
+	golangci-lint run
+
 install:
 	@echo "Installing subnode"
 	@go install -mod readonly $(BUILD_FLAGS) ./...
