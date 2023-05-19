@@ -143,16 +143,6 @@ func SelectMatchedBackend(height int64, t config.ProtocolType) (*BackendState, e
 
 func IsNeededToFetchLastBlock(s *BackendState) bool {
 	return s.NodeType == config.BackendNodeTypePruned
-
-	//if (s.NodeType == BackendNodeTypePruned) || (s.NodeType == BackendNodeTypeArchive) {
-	//	return true
-	//} else if s.NodeType == BackendNodeTypeSubNode {
-	//	if s.Backend.Blocks[1] == 0 {
-	//		return true
-	//	}
-	//}
-
-	return false
 }
 
 func TaskUpdateState() {
@@ -212,10 +202,10 @@ func doUpdateState() {
 }
 
 func FetchHeightFromStatus(rpcUrl string) (int64, error) {
-	url := rpcUrl + "/status"
+	urlRequest := rpcUrl + "/status"
 	spaceClient := http.Client{Timeout: time.Second * 10}
 
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, urlRequest, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -226,7 +216,9 @@ func FetchHeightFromStatus(rpcUrl string) (int64, error) {
 	}
 
 	if res.Body != nil {
-		defer res.Body.Close()
+		defer func() {
+			_ = res.Body.Close()
+		}()
 	}
 
 	body, err := io.ReadAll(res.Body)

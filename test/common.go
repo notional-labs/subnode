@@ -23,10 +23,7 @@ func startServer() {
 	}
 	//fmt.Printf("%+v\n", c)
 	config.SetConfig(c)
-	err = server.Start()
-	if err != nil {
-		panic(err)
-	}
+	server.Start()
 }
 
 func getNetworkName() string {
