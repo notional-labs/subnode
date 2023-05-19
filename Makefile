@@ -19,7 +19,7 @@ test-osmosis:
 
 test-evmos:
 	@echo "Testing subnode with evmos config"
-	@go test -mod readonly --timeout=10m -ldflags '$(LD_FLAGS) -X github.com/notional-labs/subnode/test.Chain=evmos' ./...
+	@go test -mod readonly --timeout=10m -ldflags '$(LD_FLAGS) -X github.com/notional-labs/subnode/test.Chain=evmos' ./test
 
 lint:
 	@echo "Running golangci-lint"
