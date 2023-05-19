@@ -33,7 +33,7 @@ func (s *RpcTestSuite) TearDownSuite() {
 }
 
 func (s *RpcTestSuite) SetupTest() {
-	time.Sleep(1 * time.Second)
+	time.Sleep(SleepBeforeEachTest)
 }
 
 func (s *RpcTestSuite) TestRpc_abci_info() {
@@ -101,13 +101,23 @@ func (s *RpcTestSuite) TestRpc_block_results() {
 
 func (s *RpcTestSuite) TestRpc_block_search() {
 	// {"jsonrpc":"2.0","id":-1,"result":{"blocks":[{"block_id":{"hash":"D9CE09E9B332C4374FD03EAE5211AA306A87A14BD74E99785515A79B3C5057F7"...
-	rpcUrl := s.UrlEndpoint + "/block_search?query=\"block.height%20>%201\"&page=1&per_page=1&order_by=\"asc\"&match_events=true"
+
+	// get last_block_height first
+	rpcUrl := s.UrlEndpoint + "/block?"
 	body, err := sn.FetchUriOverHttp(rpcUrl)
+	s.NoError(err)
+	v_height := gojsonq.New().FromString(string(body)).Find("result.block.header.height")
+	height, err := strconv.ParseInt(v_height.(string), 10, 64)
+	s.NoError(err)
+
+	///////////
+	rpcUrl = fmt.Sprint(s.UrlEndpoint, "/block_search?query=\"block.height%20=%20", height, "\"&page=1&per_page=1&order_by=\"asc\"")
+	s.T().Log("rpcUrl=", rpcUrl)
+	body, err = sn.FetchUriOverHttp(rpcUrl)
 	s.NoError(err)
 
 	v_hash := gojsonq.New().FromString(string(body)).Find("result.blocks.[0].block_id.hash")
 	s.True(len(v_hash.(string)) == 64)
-
 }
 
 func (s *RpcTestSuite) TestRpc_blockchain() {
@@ -351,12 +361,10 @@ func (s *RpcTestSuite) TestRpc_tx() {
 	//    "height": "9657343",
 
 	// figure out which chain running test on
-	network := getNetworkName()
-	tx_hash := ""
-	if network == "osmosis-1" {
-		tx_hash = "0x7E651387114BCFAAC7AA9A49489C39D6D7D3EB7272025D973EC6E58C02A6B849"
+	tx_hash := "0x7E651387114BCFAAC7AA9A49489C39D6D7D3EB7272025D973EC6E58C02A6B849"
+	if Chain == "evmos" {
+		tx_hash = "0xC3A6D0ED36D543BB3A587F3DED7C4B8478E6CD59C494EB202B8B5FB37E5DE879"
 	}
-	s.True(len(tx_hash) > 0)
 
 	rpcUrl := fmt.Sprint(s.UrlEndpoint, "/tx?hash=", tx_hash, "&prove=true")
 	body, err := sn.FetchUriOverHttp(rpcUrl)
@@ -377,12 +385,10 @@ func (s *RpcTestSuite) TestRpc_tx_search() {
 	//        "height": "9657343",
 
 	// figure out which chain running test on
-	network := getNetworkName()
-	block_num_test := 0
-	if network == "osmosis-1" {
-		block_num_test = 9657343
+	block_num_test := 9657343 // default for osmosis
+	if Chain == "evmos" {
+		block_num_test = 13393844
 	}
-	s.True(block_num_test > 0)
 
 	rpcUrl := fmt.Sprint(s.UrlEndpoint, "/tx_search?query=\"tx.height=", block_num_test, "\"&prove=false&page=1&per_page=1&order_by=\"asc\"")
 	body, err := sn.FetchUriOverHttp(rpcUrl)
