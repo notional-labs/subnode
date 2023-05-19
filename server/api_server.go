@@ -16,6 +16,11 @@ var apiServer *http.Server
 func StartApiServer() {
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		prunedNode := state.SelectPrunedNode(config.ProtocolTypeApi)
+
+		if r.Method != "GET" && r.Method != "POST" {
+			_ = utils.SendError(w)
+		}
+
 		selectedHost := prunedNode.Backend.Api // default to pruned node
 
 		if r.Method == "GET" {
@@ -25,28 +30,20 @@ func StartApiServer() {
 			if xCosmosBlockHeight != "" {
 				height, err := strconv.ParseInt(xCosmosBlockHeight, 10, 64)
 				if err != nil {
-					utils.SendError(w)
+					_ = utils.SendError(w)
 				}
 
 				node, err := state.SelectMatchedBackend(height, config.ProtocolTypeApi)
 				if err != nil {
-					utils.SendError(w)
+					_ = utils.SendError(w)
 				}
 
 				selectedHost = node.Backend.Api
-			} else {
-				selectedHost = prunedNode.Backend.Api
 			}
-
-			r.Host = r.URL.Host
-			state.ProxyMapApi[selectedHost].ServeHTTP(w, r)
-		} else if r.Method == "POST" {
-			selectedHost = prunedNode.Backend.Api
-			r.Host = r.URL.Host
-			state.ProxyMapApi[selectedHost].ServeHTTP(w, r)
-		} else {
-			utils.SendError(w)
 		}
+
+		r.Host = r.URL.Host
+		state.ProxyMapApi[selectedHost].ServeHTTP(w, r)
 	}
 	// handle all requests to your server using the proxy
 	//http.HandleFunc("/", handler)

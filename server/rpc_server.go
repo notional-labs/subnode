@@ -50,13 +50,13 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		if heightParam != "" {
 			height, err := strconv.ParseInt(heightParam, 10, 64)
 			if err != nil {
-				utils.SendError(w)
+				_ = utils.SendError(w)
 				return
 			}
 
 			node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 			if err != nil {
-				utils.SendError(w)
+				_ = utils.SendError(w)
 				return
 			}
 
@@ -69,13 +69,13 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		if heightParam != "" {
 			height, err := strconv.ParseInt(heightParam, 10, 64)
 			if err != nil {
-				utils.SendError(w)
+				_ = utils.SendError(w)
 				return
 			}
 
 			node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 			if err != nil {
-				utils.SendError(w)
+				_ = utils.SendError(w)
 				return
 			}
 
@@ -115,7 +115,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		utils.SendError(w)
+		_ = utils.SendError(w)
 		return
 	}
 
@@ -124,7 +124,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 	var j0 interface{}
 	err = json.Unmarshal(body, &j0)
 	if err != nil {
-		utils.SendError(w)
+		_ = utils.SendError(w)
 		return
 	}
 
@@ -165,14 +165,14 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
 					// height is 1st param
 					if len(positionalParams) < 1 {
-						utils.SendError(w)
+						_ = utils.SendError(w)
 						return
 					}
 
 					if heightParam, ok := positionalParams[0].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							utils.SendError(w)
+							_ = utils.SendError(w)
 							return
 						}
 					}
@@ -180,7 +180,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					if heightParam, ok := namedParams["height"].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							utils.SendError(w)
+							_ = utils.SendError(w)
 							return
 						}
 					}
@@ -189,7 +189,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 					if err != nil {
-						utils.SendError(w)
+						_ = utils.SendError(w)
 						return
 					}
 
@@ -201,14 +201,14 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
 					// maxHeight is 2nd param
 					if len(positionalParams) < 2 {
-						utils.SendError(w)
+						_ = utils.SendError(w)
 						return
 					}
 
 					if heightParam, ok := positionalParams[1].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							utils.SendError(w)
+							_ = utils.SendError(w)
 							return
 						}
 					}
@@ -216,7 +216,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					if heightParam, ok := namedParams["maxHeight"].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							utils.SendError(w)
+							_ = utils.SendError(w)
 							return
 						}
 					}
@@ -225,7 +225,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 					if err != nil {
-						utils.SendError(w)
+						_ = utils.SendError(w)
 						return
 					}
 
@@ -237,14 +237,14 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				if positionalParams, ok := m0["params"].([]interface{}); ok { // positional parameters
 					// height is 3rd param
 					if len(positionalParams) < 3 {
-						utils.SendError(w)
+						_ = utils.SendError(w)
 						return
 					}
 
 					if heightParam, ok := positionalParams[2].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							utils.SendError(w)
+							_ = utils.SendError(w)
 							return
 						}
 					}
@@ -252,7 +252,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					if heightParam, ok := namedParams["height"].(string); ok {
 						height, err = strconv.ParseInt(heightParam, 10, 64)
 						if err != nil {
-							utils.SendError(w)
+							_ = utils.SendError(w)
 							return
 						}
 					}
@@ -261,7 +261,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeRpc)
 					if err != nil {
-						utils.SendError(w)
+						_ = utils.SendError(w)
 						return
 					}
 					selectedHost = node.Backend.Rpc
@@ -298,7 +298,7 @@ func StartRpcServer() {
 		} else if r.Method == "POST" { // JSONRPC over HTTP
 			jsonRpcOverHttp(w, r)
 		} else {
-			utils.SendError(w)
+			_ = utils.SendError(w)
 			return
 		}
 	}

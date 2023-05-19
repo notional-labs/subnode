@@ -49,8 +49,6 @@ func StartGrpcServer() {
 				}
 
 				selectedHost = node.Backend.Grpc
-			} else {
-				selectedHost = prunedNode.Backend.Grpc
 			}
 
 			if strings.HasSuffix(selectedHost, ":443") { // SSL
@@ -71,7 +69,7 @@ func StartGrpcServer() {
 		panic(err)
 	}
 
-	grpcServer.Serve(lis)
+	_ = grpcServer.Serve(lis)
 }
 
 func ShutdownGrpcServer() {

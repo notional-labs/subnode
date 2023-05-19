@@ -7,12 +7,6 @@ import (
 	"time"
 )
 
-func cp(bz []byte) (ret []byte) {
-	ret = make([]byte, len(bz))
-	copy(ret, bz)
-	return ret
-}
-
 func FetchUriOverHttp(url string) ([]byte, error) {
 	hc := http.Client{Timeout: time.Second * 10}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -26,7 +20,9 @@ func FetchUriOverHttp(url string) ([]byte, error) {
 	}
 
 	if res.Body != nil {
-		defer res.Body.Close()
+		defer func() {
+			_ = res.Body.Close()
+		}()
 	}
 
 	body, err := io.ReadAll(res.Body)
@@ -54,7 +50,9 @@ func FetchJsonRpcOverHttp(url string, jsonBody []byte) ([]byte, error) {
 	}
 
 	if res.Body != nil {
-		defer res.Body.Close()
+		defer func() {
+			_ = res.Body.Close()
+		}()
 	}
 
 	body, err := io.ReadAll(res.Body)
@@ -65,14 +63,16 @@ func FetchJsonRpcOverHttp(url string, jsonBody []byte) ([]byte, error) {
 	return body, nil
 }
 
-func SendError(w http.ResponseWriter) {
+func SendError(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "text/html")
 	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte("Oops! Something was wrong"))
+	_, err := w.Write([]byte("Oops! Something was wrong"))
+	return err
 }
 
-func SendResult(w http.ResponseWriter, body []byte) {
+func SendResult(w http.ResponseWriter, body []byte) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(body)
+	_, err := w.Write(body)
+	return err
 }
