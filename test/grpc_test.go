@@ -34,8 +34,6 @@ func (s *GrpcTestSuite) SetupSuite() {
 	var Bech32PrefixAccAddr = "osmo"
 	if Chain == "evmos" {
 		Bech32PrefixAccAddr = "evmos"
-	} else {
-		panic("not supported chain " + Chain)
 	}
 
 	var (
@@ -70,8 +68,6 @@ func (s *GrpcTestSuite) TestGrpc_GetBalance() {
 	if Chain == "evmos" {
 		addrstr = "evmos1rv94jqhlhx6makfwl6qs390e4shg32m6r5zkre"
 		denomstr = "aevmos"
-	} else {
-		panic("not supported chain " + Chain)
 	}
 
 	////////////////

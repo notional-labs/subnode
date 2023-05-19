@@ -364,10 +364,7 @@ func (s *RpcTestSuite) TestRpc_tx() {
 	tx_hash := "0x7E651387114BCFAAC7AA9A49489C39D6D7D3EB7272025D973EC6E58C02A6B849"
 	if Chain == "evmos" {
 		tx_hash = "0xC3A6D0ED36D543BB3A587F3DED7C4B8478E6CD59C494EB202B8B5FB37E5DE879"
-	} else {
-		panic("not supported chain " + Chain)
 	}
-	s.True(len(tx_hash) > 0)
 
 	rpcUrl := fmt.Sprint(s.UrlEndpoint, "/tx?hash=", tx_hash, "&prove=true")
 	body, err := sn.FetchUriOverHttp(rpcUrl)
@@ -391,8 +388,6 @@ func (s *RpcTestSuite) TestRpc_tx_search() {
 	block_num_test := 9657343 // default for osmosis
 	if Chain == "evmos" {
 		block_num_test = 13393844
-	} else {
-		panic("not supported chain " + Chain)
 	}
 
 	rpcUrl := fmt.Sprint(s.UrlEndpoint, "/tx_search?query=\"tx.height=", block_num_test, "\"&prove=false&page=1&per_page=1&order_by=\"asc\"")
