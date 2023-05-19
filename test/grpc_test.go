@@ -4,10 +4,12 @@ import (
 	"context"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	grpctypes "github.com/cosmos/cosmos-sdk/types/grpc"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/stretchr/testify/suite"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 	"testing"
 	"time"
 )
@@ -67,7 +69,9 @@ func (s *GrpcTestSuite) TestGrpc_GetBalance() {
 		grpc.WithDefaultCallOptions(grpc.ForceCodec(codec.NewProtoCodec(nil).GRPCCodec())),
 	)
 	s.NoError(err)
-	defer grpcConn.Close()
+	defer func() {
+		_ = grpcConn.Close()
+	}()
 
 	// This creates a gRPC client to query the x/bank service.
 	bankClient := banktypes.NewQueryClient(grpcConn)
@@ -76,6 +80,19 @@ func (s *GrpcTestSuite) TestGrpc_GetBalance() {
 		&banktypes.QueryBalanceRequest{Address: myAddress.String(), Denom: "uosmo"},
 	)
 	s.NoError(err)
-	//fmt.Println(bankRes.GetBalance()) // Prints the account balance
+	s.T().Log("balance=", bankRes.GetBalance())
+	s.True(bankRes.GetBalance().Amount.Int64() > 0)
+
+	////////////////////////////////////////////////////////////////////////////////////////
+	// Query for historical state
+	var header metadata.MD
+	bankRes, err = bankClient.Balance(
+		metadata.AppendToOutgoingContext(context.Background(), grpctypes.GRPCBlockHeightHeader, "8000000"), // Add metadata to request
+		&banktypes.QueryBalanceRequest{Address: myAddress.String(), Denom: "uosmo"},
+		grpc.Header(&header), // Retrieve header from response
+	)
+	s.NoError(err)
+	blockHeight := header.Get(grpctypes.GRPCBlockHeightHeader)
+	s.T().Log("balance=", bankRes.GetBalance(), "at height=", blockHeight)
 	s.True(bankRes.GetBalance().Amount.Int64() > 0)
 }
