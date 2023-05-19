@@ -11,7 +11,11 @@ build:
 
 test:
 	@echo "Testing subnode"
-	@go test -mod readonly $(BUILD_FLAGS) ./...
+	@go test -mod readonly --timeout=10m $(BUILD_FLAGS) ./...
+
+lint:
+	@echo "Running golangci-lint"
+	golangci-lint run --timeout=10m
 
 install:
 	@echo "Installing subnode"
