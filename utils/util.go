@@ -8,7 +8,7 @@ import (
 )
 
 func FetchUriOverHttp(url string) ([]byte, error) {
-	hc := http.Client{Timeout: time.Second * 10}
+	hc := http.Client{Timeout: time.Second * 30}
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func FetchUriOverHttp(url string) ([]byte, error) {
 }
 
 func FetchJsonRpcOverHttp(url string, jsonBody []byte) ([]byte, error) {
-	hc := http.Client{Timeout: time.Second * 10}
+	hc := http.Client{Timeout: time.Second * 30}
 
 	bodyReader := bytes.NewReader(jsonBody)
 	req, err := http.NewRequest(http.MethodPost, url, bodyReader)
