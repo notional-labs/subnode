@@ -15,7 +15,7 @@ test:
 
 lint:
 	@echo "Running golangci-lint"
-	golangci-lint run
+	golangci-lint run --timeout=10m
 
 install:
 	@echo "Installing subnode"
