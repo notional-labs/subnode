@@ -31,7 +31,7 @@ func (s *ApiTestSuite) TearDownSuite() {
 }
 
 func (s *ApiTestSuite) SetupTest() {
-	time.Sleep(1 * time.Second)
+	time.Sleep(SleepBeforeEachTest)
 }
 
 func (s *ApiTestSuite) TestApi_cosmos_staking_v1beta1_params() {

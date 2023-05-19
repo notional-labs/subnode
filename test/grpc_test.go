@@ -31,7 +31,13 @@ func (s *GrpcTestSuite) SetupSuite() {
 
 	s.UrlEndpoint = "localhost:9090"
 
-	const Bech32PrefixAccAddr = "osmo"
+	var Bech32PrefixAccAddr = "osmo"
+	if Chain == "evmos" {
+		Bech32PrefixAccAddr = "evmos"
+	} else {
+		panic("not supported chain " + Chain)
+	}
+
 	var (
 		// Bech32PrefixAccPub defines the Bech32 prefix of an account's public key.
 		Bech32PrefixAccPub = Bech32PrefixAccAddr + "pub"
@@ -55,11 +61,21 @@ func (s *GrpcTestSuite) TearDownSuite() {
 }
 
 func (s *GrpcTestSuite) SetupTest() {
-	time.Sleep(1 * time.Second)
+	time.Sleep(SleepBeforeEachTest)
 }
 
 func (s *GrpcTestSuite) TestGrpc_GetBalance() {
-	myAddress, err := sdk.AccAddressFromBech32("osmo1083svrca4t350mphfv9x45wq9asrs60cq5yv9n")
+	addrstr := "osmo1083svrca4t350mphfv9x45wq9asrs60cq5yv9n"
+	denomstr := "uosmo"
+	if Chain == "evmos" {
+		addrstr = "evmos1rv94jqhlhx6makfwl6qs390e4shg32m6r5zkre"
+		denomstr = "aevmos"
+	} else {
+		panic("not supported chain " + Chain)
+	}
+
+	////////////////
+	myAddress, err := sdk.AccAddressFromBech32(addrstr)
 	s.NoError(err)
 
 	// Create a connection to the gRPC server.
@@ -77,22 +93,22 @@ func (s *GrpcTestSuite) TestGrpc_GetBalance() {
 	bankClient := banktypes.NewQueryClient(grpcConn)
 	bankRes, err := bankClient.Balance(
 		context.Background(),
-		&banktypes.QueryBalanceRequest{Address: myAddress.String(), Denom: "uosmo"},
+		&banktypes.QueryBalanceRequest{Address: myAddress.String(), Denom: denomstr},
 	)
 	s.NoError(err)
 	s.T().Log("balance=", bankRes.GetBalance())
-	s.True(bankRes.GetBalance().Amount.Int64() > 0)
+	s.True(len(bankRes.GetBalance().Amount.String()) > 0)
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	// Query for historical state
 	var header metadata.MD
 	bankRes, err = bankClient.Balance(
 		metadata.AppendToOutgoingContext(context.Background(), grpctypes.GRPCBlockHeightHeader, "8000000"), // Add metadata to request
-		&banktypes.QueryBalanceRequest{Address: myAddress.String(), Denom: "uosmo"},
+		&banktypes.QueryBalanceRequest{Address: myAddress.String(), Denom: denomstr},
 		grpc.Header(&header), // Retrieve header from response
 	)
 	s.NoError(err)
 	blockHeight := header.Get(grpctypes.GRPCBlockHeightHeader)
 	s.T().Log("balance=", bankRes.GetBalance(), "at height=", blockHeight)
-	s.True(bankRes.GetBalance().Amount.Int64() > 0)
+	s.True(len(bankRes.GetBalance().Amount.String()) > 0)
 }

@@ -10,8 +10,12 @@ build:
 	@go build -mod readonly $(BUILD_FLAGS) -o build/subnode main.go
 
 test:
-	@echo "Testing subnode"
+	@echo "Testing subnode with default osmosis config"
 	@go test -mod readonly --timeout=10m $(BUILD_FLAGS) ./...
+
+test-evmos:
+	@echo "Testing subnode with evmos config"
+	@go test -mod readonly --timeout=10m -ldflags '$(LD_FLAGS) -X github.com/notional-labs/subnode/test.Chain=evmos' ./...
 
 lint:
 	@echo "Running golangci-lint"
