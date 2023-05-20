@@ -9,6 +9,7 @@ type Backend struct {
 	Rpc  string // url to rpc, eg., https://rpc-osmosis-ia.cosmosia.notional.ventures:443
 	Api  string // url to api, eg., https://api-osmosis-ia.cosmosia.notional.ventures:443
 	Grpc string // url to api, eg., grpc-osmosis-ia.cosmosia.notional.ventures:443
+	Eth  string // url to api, eg., https://jsonrpc-evmos-ia.cosmosia.notional.ventures:443
 
 	// examples:
 	// 	[1, 100] => from block 1 to block 100 (subnode)
@@ -35,6 +36,7 @@ const (
 	ProtocolTypeRpc  ProtocolType = 0
 	ProtocolTypeApi  ProtocolType = 1
 	ProtocolTypeGrpc ProtocolType = 2
+	ProtocolTypeEth  ProtocolType = 3
 )
 
 var (

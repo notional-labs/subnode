@@ -21,6 +21,7 @@ import (
 var grpcServer *grpc.Server
 
 func StartGrpcServer() {
+	fmt.Println("StartGrpcServer...")
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: false,
 	}
@@ -69,7 +70,9 @@ func StartGrpcServer() {
 		panic(err)
 	}
 
-	_ = grpcServer.Serve(lis)
+	go func() {
+		_ = grpcServer.Serve(lis)
+	}()
 }
 
 func ShutdownGrpcServer() {

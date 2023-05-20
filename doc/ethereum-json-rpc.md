@@ -1,8 +1,11 @@
-# Methods
+# Eth JsonRpc
+
+List of Methods
 
 ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/methods.md
 
     [ ] web3_clientVersion
+        route to pruned node
     [ ] web3_sha3
     [ ] net_version
     [ ] net_peerCount

@@ -290,6 +290,7 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 }
 
 func StartRpcServer() {
+	fmt.Println("StartRpcServer...")
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" { // URI over HTTP
 			// see `/doc/rpc.md` and `https://github.com/tendermint/tendermint/blob/main/light/proxy/routes.go` to see the logic

@@ -10,7 +10,7 @@ import (
 // Chain is set at compile time `-X github.com/notional-labs/subnode/test.Chain=osmosis`
 // supported value: osmosis, evmos
 // default is osmosis
-var Chain = "osmosis"
+var Chain = "evmos"
 
 const SleepBeforeEachTest = 2 * time.Second
 
