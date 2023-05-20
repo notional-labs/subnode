@@ -160,6 +160,20 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 
 					selectedHost = node.Backend.Eth
 				}
+			} else if method == "eth_getProof" {
+				height := getHeightFromEthJsonrpcParams(m0["params"], 3, 1, w)
+
+				fmt.Println("height=", height)
+
+				if height >= 0 {
+					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
+					if err != nil {
+						_ = utils.SendError(w)
+						return
+					}
+
+					selectedHost = node.Backend.Eth
+				}
 			}
 		}
 	}
