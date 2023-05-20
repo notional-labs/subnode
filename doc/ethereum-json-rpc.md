@@ -26,7 +26,8 @@ ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/
         route to pruned node
     [x] eth_getBalance
         base on Block Number only, otherwise route to pruned node
-    [ ] eth_getStorageAt
+    [x] eth_getStorageAt
+        base on Block Number only, otherwise route to pruned node
     [ ] eth_getTransactionCount
     [ ] eth_getBlockTransactionCountByNumber
     [ ] eth_getBlockTransactionCountByHash

@@ -65,11 +65,44 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					}
 
 					if heightParam, ok := positionalParams[1].(string); ok {
-						heightParam = strings.TrimPrefix(heightParam, "0x")
-						height, err = strconv.ParseInt(heightParam, 16, 64)
-						if err != nil {
-							_ = utils.SendError(w)
-							return
+						if strings.HasPrefix(heightParam, "0x") {
+							heightParam = strings.TrimPrefix(heightParam, "0x")
+							height, err = strconv.ParseInt(heightParam, 16, 64)
+							if err != nil {
+								_ = utils.SendError(w)
+								return
+							}
+						}
+					}
+				}
+
+				if height >= 0 {
+					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
+					if err != nil {
+						_ = utils.SendError(w)
+						return
+					}
+
+					selectedHost = node.Backend.Eth
+				}
+			} else if method == "eth_getStorageAt" {
+				height := int64(-1)
+
+				if positionalParams, ok := m0["params"].([]interface{}); ok {
+					// height is 3rd param
+					if len(positionalParams) < 3 {
+						_ = utils.SendError(w)
+						return
+					}
+
+					if heightParam, ok := positionalParams[2].(string); ok {
+						if strings.HasPrefix(heightParam, "0x") {
+							heightParam = strings.TrimPrefix(heightParam, "0x")
+							height, err = strconv.ParseInt(heightParam, 16, 64)
+							if err != nil {
+								_ = utils.SendError(w)
+								return
+							}
 						}
 					}
 				}
