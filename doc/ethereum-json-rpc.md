@@ -35,10 +35,14 @@ ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/
     [ ] eth_getBlockTransactionCountByHash
     [x] eth_getCode
         base on Block Number only, otherwise route to pruned node
-    [ ] eth_sign
-    [ ] eth_sendTransaction
-    [ ] eth_sendRawTransaction
-    [ ] eth_call
+    [x] eth_sign
+        route to pruned node
+    [x] eth_sendTransaction
+        route to pruned node
+    [x] eth_sendRawTransaction
+        route to pruned node
+    [x] eth_call
+        base on Block Number only, otherwise route to pruned node
     [ ] eth_estimateGas
     [ ] eth_getBlockByNumber
     [ ] eth_getBlockByHash
