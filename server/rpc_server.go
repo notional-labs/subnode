@@ -88,19 +88,19 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 		//fmt.Printf("query=%s", strQuery)
 
 		if strings.HasPrefix(r.RequestURI, "/status") {
-			aggerator.DoAggeratorUriOverHttp_status(w, strQuery)
+			aggerator.RpcUriOverHttp_status(w, strQuery)
 			return
 		} else if strings.HasPrefix(r.RequestURI, "/tx_search") {
-			aggerator.DoAggeratorUriOverHttp_tx_search(w, strQuery)
+			aggerator.RpcUriOverHttp_tx_search(w, strQuery)
 			return
 		} else if strings.HasPrefix(r.RequestURI, "/block_by_hash") {
-			aggerator.DoAggeratorUriOverHttp_block_by_hash(w, strQuery)
+			aggerator.RpcUriOverHttp_block_by_hash(w, strQuery)
 			return
 		} else if strings.HasPrefix(r.RequestURI, "/tx") {
-			aggerator.DoAggeratorUriOverHttp_tx(w, strQuery)
+			aggerator.RpcUriOverHttp_tx(w, strQuery)
 			return
 		} else if strings.HasPrefix(r.RequestURI, "/block_search") {
-			aggerator.DoAggeratorUriOverHttp_block_search(w, strQuery)
+			aggerator.RpcUriOverHttp_block_search(w, strQuery)
 			return
 		}
 	}
@@ -268,16 +268,16 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				}
 			} else { // try to support partially for other methods
 				if method == "tx_search" {
-					aggerator.DoAggeratorJsonRpcOverHttp_tx_search(w, body)
+					aggerator.RpcJsonRpcOverHttp_tx_search(w, body)
 					return
 				} else if method == "block_by_hash" {
-					aggerator.DoAggeratorJsonRpcOverHttp_block_by_hash(w, body)
+					aggerator.RpcJsonRpcOverHttp_block_by_hash(w, body)
 					return
 				} else if method == "tx" {
-					aggerator.DoAggeratorJsonRpcOverHttp_tx(w, body)
+					aggerator.RpcJsonRpcOverHttp_tx(w, body)
 					return
 				} else if method == "block_search" {
-					aggerator.DoAggeratorJsonRpcOverHttp_block_search(w, body)
+					aggerator.RpcJsonRpcOverHttp_block_search(w, body)
 					return
 				}
 			}

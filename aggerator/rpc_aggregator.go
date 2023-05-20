@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func DoAggeratorUriOverHttp_status(w http.ResponseWriter, strQuery string) {
+func RpcUriOverHttp_status(w http.ResponseWriter, strQuery string) {
 	prunedNode := state.SelectPrunedNode(config.ProtocolTypeRpc)
 	rpcUrl := prunedNode.Backend.Rpc + "/status?" + strQuery
 	body, err := utils.FetchUriOverHttp(rpcUrl)
@@ -49,7 +49,7 @@ func DoAggeratorUriOverHttp_status(w http.ResponseWriter, strQuery string) {
 // the logic here is it will iterate all the subnodes until result is found
 // https://github.com/notional-labs/subnode/issues/20
 
-func DoAggeratorJsonRpcOverHttp_block_search(w http.ResponseWriter, jsonBody []byte) {
+func RpcJsonRpcOverHttp_block_search(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range state.PoolRpc {
 		rpcUrl := s.Backend.Rpc
 		body, err := utils.FetchJsonRpcOverHttp(rpcUrl, jsonBody)
@@ -77,7 +77,7 @@ func DoAggeratorJsonRpcOverHttp_block_search(w http.ResponseWriter, jsonBody []b
 	_ = utils.SendError(w)
 }
 
-func DoAggeratorJsonRpcOverHttp_tx(w http.ResponseWriter, jsonBody []byte) {
+func RpcJsonRpcOverHttp_tx(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range state.PoolRpc {
 		rpcUrl := s.Backend.Rpc
 		body, err := utils.FetchJsonRpcOverHttp(rpcUrl, jsonBody)
@@ -103,7 +103,7 @@ func DoAggeratorJsonRpcOverHttp_tx(w http.ResponseWriter, jsonBody []byte) {
 	_ = utils.SendError(w)
 }
 
-func DoAggeratorJsonRpcOverHttp_block_by_hash(w http.ResponseWriter, jsonBody []byte) {
+func RpcJsonRpcOverHttp_block_by_hash(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range state.PoolRpc {
 		rpcUrl := s.Backend.Rpc
 		body, err := utils.FetchJsonRpcOverHttp(rpcUrl, jsonBody)
@@ -129,7 +129,7 @@ func DoAggeratorJsonRpcOverHttp_block_by_hash(w http.ResponseWriter, jsonBody []
 	_ = utils.SendError(w)
 }
 
-func DoAggeratorJsonRpcOverHttp_tx_search(w http.ResponseWriter, jsonBody []byte) {
+func RpcJsonRpcOverHttp_tx_search(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range state.PoolRpc {
 		rpcUrl := s.Backend.Rpc
 		body, err := utils.FetchJsonRpcOverHttp(rpcUrl, jsonBody)
@@ -157,7 +157,7 @@ func DoAggeratorJsonRpcOverHttp_tx_search(w http.ResponseWriter, jsonBody []byte
 	_ = utils.SendError(w)
 }
 
-func DoAggeratorUriOverHttp_tx(w http.ResponseWriter, strQuery string) {
+func RpcUriOverHttp_tx(w http.ResponseWriter, strQuery string) {
 	for i, s := range state.PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/tx?" + strQuery
 		body, err := utils.FetchUriOverHttp(rpcUrl)
@@ -183,7 +183,7 @@ func DoAggeratorUriOverHttp_tx(w http.ResponseWriter, strQuery string) {
 	_ = utils.SendError(w)
 }
 
-func DoAggeratorUriOverHttp_block_by_hash(w http.ResponseWriter, strQuery string) {
+func RpcUriOverHttp_block_by_hash(w http.ResponseWriter, strQuery string) {
 	for i, s := range state.PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/block_by_hash?" + strQuery
 		body, err := utils.FetchUriOverHttp(rpcUrl)
@@ -209,7 +209,7 @@ func DoAggeratorUriOverHttp_block_by_hash(w http.ResponseWriter, strQuery string
 	_ = utils.SendError(w)
 }
 
-func DoAggeratorUriOverHttp_block_search(w http.ResponseWriter, strQuery string) {
+func RpcUriOverHttp_block_search(w http.ResponseWriter, strQuery string) {
 	for i, s := range state.PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/block_search?" + strQuery
 		body, err := utils.FetchUriOverHttp(rpcUrl)
@@ -237,7 +237,7 @@ func DoAggeratorUriOverHttp_block_search(w http.ResponseWriter, strQuery string)
 	_ = utils.SendError(w)
 }
 
-func DoAggeratorUriOverHttp_tx_search(w http.ResponseWriter, strQuery string) {
+func RpcUriOverHttp_tx_search(w http.ResponseWriter, strQuery string) {
 	for i, s := range state.PoolRpc {
 		rpcUrl := s.Backend.Rpc + "/tx_search?" + strQuery
 		body, err := utils.FetchUriOverHttp(rpcUrl)
