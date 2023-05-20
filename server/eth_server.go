@@ -40,7 +40,8 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 
 			fmt.Printf("method=%s, params=%+v\n", method, m0["params"])
 
-			if method == "web3_clientVersion" {
+			if method == "web3_clientVersion" ||
+				method == "web3_sha3" {
 				selectedHost = prunedNode.Backend.Eth
 			}
 		}
