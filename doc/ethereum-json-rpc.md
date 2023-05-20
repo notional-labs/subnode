@@ -30,7 +30,8 @@ ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/
         base on Block Number only, otherwise route to pruned node
     [x] eth_getTransactionCount
         base on Block Number only, otherwise route to pruned node
-    [ ] eth_getBlockTransactionCountByNumber
+    [x] eth_getBlockTransactionCountByNumber
+        base on Block Number only, otherwise route to pruned node
     [ ] eth_getBlockTransactionCountByHash
     [ ] eth_getCode
     [ ] eth_sign
