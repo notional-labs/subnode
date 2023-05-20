@@ -116,6 +116,37 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 
 					selectedHost = node.Backend.Eth
 				}
+			} else if method == "eth_getTransactionCount" {
+				height := int64(-1)
+
+				if positionalParams, ok := m0["params"].([]interface{}); ok {
+					// height is 2nd param
+					if len(positionalParams) < 2 {
+						_ = utils.SendError(w)
+						return
+					}
+
+					if heightParam, ok := positionalParams[1].(string); ok {
+						if strings.HasPrefix(heightParam, "0x") {
+							heightParam = strings.TrimPrefix(heightParam, "0x")
+							height, err = strconv.ParseInt(heightParam, 16, 64)
+							if err != nil {
+								_ = utils.SendError(w)
+								return
+							}
+						}
+					}
+				}
+
+				if height >= 0 {
+					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
+					if err != nil {
+						_ = utils.SendError(w)
+						return
+					}
+
+					selectedHost = node.Backend.Eth
+				}
 			}
 		}
 	}
