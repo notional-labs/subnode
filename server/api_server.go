@@ -14,6 +14,7 @@ import (
 var apiServer *http.Server
 
 func StartApiServer() {
+	fmt.Println("StartApiServer...")
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		prunedNode := state.SelectPrunedNode(config.ProtocolTypeApi)
 

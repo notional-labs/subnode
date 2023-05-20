@@ -17,6 +17,7 @@ As data is spreaded over multiple sub-nodes, its required to have a proxy which 
 - [Tendermint RPC/JSONRPC](doc/rpc.md) on port 26657
 - LCD/API on port 1337
 - GRPC on port 9090
+- [Eth JsonRpc](doc/ethereum-json-rpc.md) on port 8545
 
 Public enndpoints of subnode with the config below:
 ```console

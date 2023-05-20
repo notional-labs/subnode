@@ -25,8 +25,10 @@ var (
 	PoolRpc     []*BackendState
 	PoolApi     []*BackendState
 	PoolGrpc    []*BackendState
+	PoolEth     []*BackendState
 	ProxyMapRpc = make(map[string]*httputil.ReverseProxy)
 	ProxyMapApi = make(map[string]*httputil.ReverseProxy)
+	ProxyMapEth = make(map[string]*httputil.ReverseProxy)
 )
 
 func Init() {
@@ -47,11 +49,20 @@ func Init() {
 		}
 		ProxyMapApi[s.Name] = httputil.NewSingleHostReverseProxy(target)
 	}
+
+	for _, s := range PoolEth {
+		target, err := url.Parse(s.Name)
+		if err != nil {
+			panic(err)
+		}
+		ProxyMapEth[s.Name] = httputil.NewSingleHostReverseProxy(target)
+	}
 }
 
 func InitPool() {
 	PoolRpc = PoolRpc[:0] // Remove all elements
 	PoolApi = PoolApi[:0] // Remove all elements
+	PoolEth = PoolEth[:0] // Remove all elements
 
 	for _, s := range config.GetConfig().Upstream {
 		be := s // fix Copying the address of a loop variable in Go
@@ -84,6 +95,16 @@ func InitPool() {
 		}
 		fmt.Printf("debug: %+v\n", backendStateGrpc)
 		PoolGrpc = append(PoolGrpc, &backendStateGrpc)
+
+		//
+		backendStateEth := BackendState{
+			Name:      s.Eth,
+			NodeType:  config.GetBackendNodeType(&be),
+			LastBlock: 0,
+			Backend:   &be,
+		}
+		fmt.Printf("debug: %+v\n", backendStateEth)
+		PoolEth = append(PoolEth, &backendStateEth)
 	}
 
 	TaskUpdateState()
@@ -108,6 +129,8 @@ func GetPool(t config.ProtocolType) []*BackendState {
 		return PoolApi
 	} else if t == config.ProtocolTypeGrpc {
 		return PoolGrpc
+	} else if t == config.ProtocolTypeEth {
+		return PoolEth
 	}
 
 	return nil
@@ -190,6 +213,17 @@ func doUpdateState() {
 	}
 
 	for _, s := range PoolGrpc {
+		if IsNeededToFetchLastBlock(s) {
+			height, err := FetchHeightFromStatus(s.Backend.Rpc)
+			if err == nil {
+				s.LastBlock = height
+			} else {
+				fmt.Println("Err FetchHeightFromStatus", err)
+			}
+		}
+	}
+
+	for _, s := range PoolEth {
 		if IsNeededToFetchLastBlock(s) {
 			height, err := FetchHeightFromStatus(s.Backend.Rpc)
 			if err == nil {
