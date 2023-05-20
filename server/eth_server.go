@@ -47,7 +47,8 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				method == "net_listening" ||
 				method == "eth_protocolVersion" ||
 				method == "eth_syncing" ||
-				method == "eth_syncing" {
+				method == "eth_gasPrice" ||
+				method == "eth_accounts" {
 				selectedHost = prunedNode.Backend.Eth
 			}
 		}
