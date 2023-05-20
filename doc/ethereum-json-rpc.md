@@ -43,8 +43,10 @@ ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/
         route to pruned node
     [x] eth_call
         base on Block Number only, otherwise route to pruned node
-    [ ] eth_estimateGas
-    [ ] eth_getBlockByNumber
+    [x] eth_estimateGas
+        route to pruned node
+    [x] eth_getBlockByNumber
+        base on Block Number only, otherwise route to pruned node
     [ ] eth_getBlockByHash
     [ ] eth_getTransactionByHash
     [ ] eth_getTransactionByBlockHashAndIndex
