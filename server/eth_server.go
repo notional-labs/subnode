@@ -54,27 +54,9 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 			//	method == "eth_blockNumber" {
 			//	selectedHost = prunedNode.Backend.Eth
 			//} else
+
 			if method == "eth_getBalance" {
-				height := int64(-1)
-
-				if positionalParams, ok := m0["params"].([]interface{}); ok {
-					// height is 2nd param
-					if len(positionalParams) < 2 {
-						_ = utils.SendError(w)
-						return
-					}
-
-					if heightParam, ok := positionalParams[1].(string); ok {
-						if strings.HasPrefix(heightParam, "0x") {
-							heightParam = strings.TrimPrefix(heightParam, "0x")
-							height, err = strconv.ParseInt(heightParam, 16, 64)
-							if err != nil {
-								_ = utils.SendError(w)
-								return
-							}
-						}
-					}
-				}
+				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -117,26 +99,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_getTransactionCount" {
-				height := int64(-1)
-
-				if positionalParams, ok := m0["params"].([]interface{}); ok {
-					// height is 2nd param
-					if len(positionalParams) < 2 {
-						_ = utils.SendError(w)
-						return
-					}
-
-					if heightParam, ok := positionalParams[1].(string); ok {
-						if strings.HasPrefix(heightParam, "0x") {
-							heightParam = strings.TrimPrefix(heightParam, "0x")
-							height, err = strconv.ParseInt(heightParam, 16, 64)
-							if err != nil {
-								_ = utils.SendError(w)
-								return
-							}
-						}
-					}
-				}
+				height := getHeightFromEthJsonrpcParams(m0["params"], 3, 2, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -148,26 +111,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_getBlockTransactionCountByNumber" {
-				height := int64(-1)
-
-				if positionalParams, ok := m0["params"].([]interface{}); ok {
-					// height is 2nd param
-					if len(positionalParams) < 1 {
-						_ = utils.SendError(w)
-						return
-					}
-
-					if heightParam, ok := positionalParams[0].(string); ok {
-						if strings.HasPrefix(heightParam, "0x") {
-							heightParam = strings.TrimPrefix(heightParam, "0x")
-							height, err = strconv.ParseInt(heightParam, 16, 64)
-							if err != nil {
-								_ = utils.SendError(w)
-								return
-							}
-						}
-					}
-				}
+				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -179,26 +123,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_getCode" {
-				height := int64(-1)
-
-				if positionalParams, ok := m0["params"].([]interface{}); ok {
-					// height is 2nd param
-					if len(positionalParams) < 2 {
-						_ = utils.SendError(w)
-						return
-					}
-
-					if heightParam, ok := positionalParams[1].(string); ok {
-						if strings.HasPrefix(heightParam, "0x") {
-							heightParam = strings.TrimPrefix(heightParam, "0x")
-							height, err = strconv.ParseInt(heightParam, 16, 64)
-							if err != nil {
-								_ = utils.SendError(w)
-								return
-							}
-						}
-					}
-				}
+				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -210,26 +135,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_call" {
-				height := int64(-1)
-
-				if positionalParams, ok := m0["params"].([]interface{}); ok {
-					// height is 2nd param
-					if len(positionalParams) < 2 {
-						_ = utils.SendError(w)
-						return
-					}
-
-					if heightParam, ok := positionalParams[1].(string); ok {
-						if strings.HasPrefix(heightParam, "0x") {
-							heightParam = strings.TrimPrefix(heightParam, "0x")
-							height, err = strconv.ParseInt(heightParam, 16, 64)
-							if err != nil {
-								_ = utils.SendError(w)
-								return
-							}
-						}
-					}
-				}
+				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -241,26 +147,9 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_getBlockByNumber" {
-				height := int64(-1)
+				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 0, w)
 
-				if positionalParams, ok := m0["params"].([]interface{}); ok {
-					// height is 1st param
-					if len(positionalParams) < 2 {
-						_ = utils.SendError(w)
-						return
-					}
-
-					if heightParam, ok := positionalParams[0].(string); ok {
-						if strings.HasPrefix(heightParam, "0x") {
-							heightParam = strings.TrimPrefix(heightParam, "0x")
-							height, err = strconv.ParseInt(heightParam, 16, 64)
-							if err != nil {
-								_ = utils.SendError(w)
-								return
-							}
-						}
-					}
-				}
+				fmt.Println("height=", height)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -275,6 +164,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	fmt.Println("selectedHost=", selectedHost)
 	r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
 	r.Host = r.URL.Host
 	state.ProxyMapEth[selectedHost].ServeHTTP(w, r)
@@ -304,4 +194,39 @@ func ShutdownEthServer() {
 	if err := ethServer.Shutdown(context.Background()); err != nil {
 		log.Printf("ethServer Shutdown: %v", err)
 	}
+}
+
+func getHeightFromEthJsonrpcParams(params interface{}, paramsLen int, posHeight int, w http.ResponseWriter) (height int64) {
+	height = int64(-1)
+
+	positionalParams, ok := params.([]interface{})
+	if !ok {
+		_ = utils.SendError(w)
+		return
+	}
+
+	if len(positionalParams) < paramsLen {
+		_ = utils.SendError(w)
+		return
+	}
+
+	heightParam, ok := positionalParams[posHeight].(string)
+	if !ok {
+		_ = utils.SendError(w)
+		return
+	}
+
+	if !strings.HasPrefix(heightParam, "0x") {
+		return
+	}
+
+	heightParam = strings.TrimPrefix(heightParam, "0x")
+	heightNew, err := strconv.ParseInt(heightParam, 16, 64)
+	if err != nil {
+		_ = utils.SendError(w)
+		return
+	}
+
+	height = heightNew
+	return
 }
