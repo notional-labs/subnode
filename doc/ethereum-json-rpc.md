@@ -14,7 +14,8 @@ ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/
         route to pruned node
     [x] net_listening
         route to pruned node
-    [ ] eth_protocolVersion
+    [x] eth_protocolVersion
+        route to pruned node
     [ ] eth_syncing
     [ ] eth_gasPrice
     [ ] eth_accounts

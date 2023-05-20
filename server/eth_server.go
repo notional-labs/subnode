@@ -44,7 +44,8 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				method == "web3_sha3" ||
 				method == "net_version" ||
 				method == "net_peerCount" ||
-				method == "net_listening" {
+				method == "net_listening" ||
+				method == "eth_protocolVersion" {
 				selectedHost = prunedNode.Backend.Eth
 			}
 		}
