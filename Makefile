@@ -15,7 +15,7 @@ test:
 
 test-osmosis:
 	@echo "Testing subnode with default osmosis config"
-	@go test -mod readonly --timeout=10m-ldflags '$(LD_FLAGS) -X github.com/notional-labs/subnode/test.Chain=osmosis' ./test
+	@go test -mod readonly --timeout=10m -ldflags '$(LD_FLAGS) -X github.com/notional-labs/subnode/test.Chain=osmosis' ./test
 
 test-evmos:
 	@echo "Testing subnode with evmos config"
