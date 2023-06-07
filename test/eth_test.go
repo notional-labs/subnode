@@ -65,3 +65,12 @@ func (s *EthTestSuite) TestEth_getTransactionByHash() {
 	v_result := gojsonq.New().FromString(string(body)).Find("result")
 	s.True(v_result != nil)
 }
+
+func (s *EthTestSuite) TestEth_getTransactionByBlockHashAndIndex() {
+	jsonText := []byte(`{"jsonrpc":"2.0","method":"eth_getTransactionByBlockHashAndIndex","params":["0x514786aee553492748c63d7994654d0074e780ecc1d3ef5ffa68251b8810e2bd", "0x0"],"id":1}`)
+	body, err := utils.FetchJsonRpcOverHttp(s.UrlEndpoint, jsonText)
+	s.NoError(err)
+
+	v_result := gojsonq.New().FromString(string(body)).Find("result")
+	s.True(v_result != nil)
+}

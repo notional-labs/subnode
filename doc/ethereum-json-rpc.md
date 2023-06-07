@@ -52,7 +52,8 @@ ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/
         iterate all the subnodes
     [x] eth_getTransactionByHash
         iterate all the subnodes
-    [ ] eth_getTransactionByBlockHashAndIndex
+    [x] eth_getTransactionByBlockHashAndIndex
+        iterate all the subnodes
     [ ] eth_getTransactionReceipt
     [ ] eth_newFilter
     [ ] eth_newBlockFilter
