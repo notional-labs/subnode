@@ -50,7 +50,8 @@ ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/
         base on Block Number only, otherwise route to pruned node
     [x] eth_getBlockByHash
         iterate all the subnodes
-    [ ] eth_getTransactionByHash
+    [x] eth_getTransactionByHash
+        iterate all the subnodes
     [ ] eth_getTransactionByBlockHashAndIndex
     [ ] eth_getTransactionReceipt
     [ ] eth_newFilter
