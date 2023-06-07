@@ -34,28 +34,31 @@ var (
 func Init() {
 	InitPool()
 
-	for _, s := range PoolRpc {
-		target, err := url.Parse(s.Name)
-		if err != nil {
-			panic(err)
-		}
-		ProxyMapRpc[s.Name] = httputil.NewSingleHostReverseProxy(target)
-	}
+	for i := 0; i < len(PoolRpc); i++ {
+		rpcItem := PoolRpc[i]
+		apiItem := PoolApi[i]
+		ethItem := PoolEth[i]
 
-	for _, s := range PoolApi {
-		target, err := url.Parse(s.Name)
+		// rpc
+		targetRpc, err := url.Parse(rpcItem.Name)
 		if err != nil {
 			panic(err)
 		}
-		ProxyMapApi[s.Name] = httputil.NewSingleHostReverseProxy(target)
-	}
+		ProxyMapRpc[rpcItem.Name] = httputil.NewSingleHostReverseProxy(targetRpc)
 
-	for _, s := range PoolEth {
-		target, err := url.Parse(s.Name)
+		// api
+		targetApi, err := url.Parse(apiItem.Name)
 		if err != nil {
 			panic(err)
 		}
-		ProxyMapEth[s.Name] = httputil.NewSingleHostReverseProxy(target)
+		ProxyMapApi[apiItem.Name] = httputil.NewSingleHostReverseProxy(targetApi)
+
+		// eth
+		targetEth, err := url.Parse(ethItem.Name)
+		if err != nil {
+			panic(err)
+		}
+		ProxyMapEth[ethItem.Name] = httputil.NewSingleHostReverseProxy(targetEth)
 	}
 }
 
@@ -190,48 +193,26 @@ func TaskUpdateState() {
 }
 
 func doUpdateState() {
-	for _, s := range PoolRpc {
-		if IsNeededToFetchLastBlock(s) {
-			height, err := FetchHeightFromStatus(s.Backend.Rpc)
-			if err == nil {
-				s.LastBlock = height
-			} else {
-				fmt.Println("Err FetchHeightFromStatus", err)
-			}
-		}
-	}
+	for i := 0; i < len(PoolRpc); i++ {
+		rpcItem := PoolRpc[i]
+		apiItem := PoolApi[i]
+		grpcItem := PoolGrpc[i]
+		ethItem := PoolEth[i]
 
-	for _, s := range PoolApi {
-		if IsNeededToFetchLastBlock(s) {
-			height, err := FetchHeightFromStatus(s.Backend.Rpc)
-			if err == nil {
-				s.LastBlock = height
-			} else {
-				fmt.Println("Err FetchHeightFromStatus", err)
-			}
+		if IsNeededToFetchLastBlock(rpcItem) == false {
+			continue
 		}
-	}
 
-	for _, s := range PoolGrpc {
-		if IsNeededToFetchLastBlock(s) {
-			height, err := FetchHeightFromStatus(s.Backend.Rpc)
-			if err == nil {
-				s.LastBlock = height
-			} else {
-				fmt.Println("Err FetchHeightFromStatus", err)
-			}
+		height, err := FetchHeightFromStatus(rpcItem.Backend.Rpc)
+		if err != nil {
+			fmt.Println("Err FetchHeightFromStatus", err)
+			continue
 		}
-	}
 
-	for _, s := range PoolEth {
-		if IsNeededToFetchLastBlock(s) {
-			height, err := FetchHeightFromStatus(s.Backend.Rpc)
-			if err == nil {
-				s.LastBlock = height
-			} else {
-				fmt.Println("Err FetchHeightFromStatus", err)
-			}
-		}
+		rpcItem.LastBlock = height
+		apiItem.LastBlock = height
+		grpcItem.LastBlock = height
+		ethItem.LastBlock = height
 	}
 }
 
