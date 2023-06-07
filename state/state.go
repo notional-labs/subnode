@@ -199,7 +199,7 @@ func doUpdateState() {
 		grpcItem := PoolGrpc[i]
 		ethItem := PoolEth[i]
 
-		if IsNeededToFetchLastBlock(rpcItem) == false {
+		if !IsNeededToFetchLastBlock(rpcItem) {
 			continue
 		}
 
