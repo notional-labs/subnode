@@ -188,6 +188,9 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 				} else if method == "eth_getTransactionByBlockHashAndIndex" {
 					aggerator.Eth_getTransactionByBlockHashAndIndex(w, body)
 					return
+				} else if method == "eth_getTransactionReceipt" {
+					aggerator.Eth_getTransactionReceipt(w, body)
+					return
 				}
 			}
 		}
