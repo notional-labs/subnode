@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/notional-labs/subnode/aggerator"
 	"github.com/notional-labs/subnode/config"
 	"github.com/notional-labs/subnode/state"
 	"github.com/notional-labs/subnode/utils"
@@ -173,6 +174,11 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					}
 
 					selectedHost = node.Backend.Eth
+				}
+			} else { // try to support partially for other methods
+				if method == "eth_getBlockTransactionCountByHash" {
+					aggerator.Eth_getBlockTransactionCountByHash(w, body)
+					return
 				}
 			}
 		}
