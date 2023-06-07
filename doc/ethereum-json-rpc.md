@@ -65,5 +65,5 @@ ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/
     [ ] eth_getLogs
     [ ] eth_coinbase
         route to pruned node
-    [ ] eth_getProof
+    [x] eth_getProof
         base on Block Number only, otherwise route to pruned node
