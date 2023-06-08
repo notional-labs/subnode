@@ -58,6 +58,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 			//	method == "eth_uninstallFilter" ||
 			//	method == "eth_getFilterChanges" ||
 			//	method == "eth_getFilterLogs" ||
+			//	method == "eth_getLogs" ||
 			//	method == "eth_blockNumber" {
 			//	method == "eth_coinbase" {
 			//	selectedHost = prunedNode.Backend.Eth

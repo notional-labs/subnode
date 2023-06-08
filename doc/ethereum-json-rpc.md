@@ -68,7 +68,8 @@ ref: https://github.com/evmos/docs/blob/main/docs/develop/api/ethereum-json-rpc/
         route to pruned node
     [x] eth_getFilterLogs
         route to pruned node
-    [ ] eth_getLogs
+    [x] eth_getLogs
+        route to pruned node
     [x] eth_coinbase
         route to pruned node
     [x] eth_getProof
