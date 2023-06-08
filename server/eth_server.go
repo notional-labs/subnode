@@ -52,6 +52,12 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 			//	method == "eth_syncing" ||
 			//	method == "eth_gasPrice" ||
 			//	method == "eth_accounts" ||
+			//	method == "eth_newFilter" ||
+			//	method == "eth_newBlockFilter" ||
+			//	method == "eth_newPendingTransactionFilter" ||
+			//	method == "eth_uninstallFilter" ||
+			//	method == "eth_getFilterChanges" ||
+			//	method == "eth_getFilterLogs" ||
 			//	method == "eth_blockNumber" {
 			//	selectedHost = prunedNode.Backend.Eth
 			//} else
