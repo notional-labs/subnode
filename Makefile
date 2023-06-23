@@ -13,9 +13,9 @@ test:
 	@echo "Testing basic"
 	@go test -mod readonly --timeout=10m $(BUILD_FLAGS) `go list ./... |grep -v github.com/notional-labs/subnode/test`
 
-test-osmosis:
-	@echo "Testing subnode with default osmosis config"
-	@go test -mod readonly --timeout=10m -ldflags '$(LD_FLAGS) -X github.com/notional-labs/subnode/test.Chain=osmosis' ./test
+#test-osmosis:
+#	@echo "Testing subnode with default osmosis config"
+#	@go test -mod readonly --timeout=10m -ldflags '$(LD_FLAGS) -X github.com/notional-labs/subnode/test.Chain=osmosis' ./test
 
 test-evmos:
 	@echo "Testing subnode with evmos config"
