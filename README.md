@@ -19,41 +19,6 @@ As data is spreaded over multiple sub-nodes, its required to have a proxy which 
 - GRPC on port 9090
 - [Eth JsonRpc](doc/ethereum-json-rpc.md) on port 8545
 
-Public enndpoints of subnode with the config below:
-```console
-https://rpc-osmosis-sub.cosmosia.notional.ventures/
-https://api-osmosis-sub.cosmosia.notional.ventures/
-grpc-osmosis-sub.cosmosia.notional.ventures:443
-```
-
-
-#### Configuration
-See sample config [subnode.yaml](subnode.yaml).
-This sample includes 1 pruned-node and 2 sub-nodes.
-
-```yaml
-upstream:
-  - rpc: "https://rpc-osmosis-ia.cosmosia.notional.ventures:443"
-    api: "https://api-osmosis-ia.cosmosia.notional.ventures:443"
-    grpc: "grpc-osmosis-ia.cosmosia.notional.ventures:443"
-    blocks: [362880]
-  - rpc: "https://rpc-osmosis-archive-sub-ia.cosmosia.notional.ventures:443"
-    api: "https://api-osmosis-archive-sub-ia.cosmosia.notional.ventures:443"
-    grpc: "grpc-osmosis-archive-sub-ia.cosmosia.notional.ventures:443"
-    blocks: [5599641,0]
-  - rpc: "https://rpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:443"
-    api: "https://api-osmosis-archive-sub1-ia.cosmosia.notional.ventures:443"
-    grpc: "grpc-osmosis-archive-sub1-ia.cosmosia.notional.ventures:443"
-    blocks: [0,5599640]
-```
-
-`blocks` config example:
-- `[1, 100]` => from block 1 to block 100 (subnode). In case its last subnode, set to-block to 0 to indicate newest block `[101, 0]`
-- `[10]` => last 10 recent blocks (for pruned node)
-- `[]` => for archive node
-
-Node on the top of the list has higher priority when selecting.
-
 
 ### Usage
 install:
@@ -66,3 +31,13 @@ start:
 ```console
 subnode start --conf=/path/to/config/file
 ```
+
+#### Configuration
+See sample config [test.config.evmos.yaml](test.config.evmos.yaml).
+
+`blocks` config example:
+- `[1, 100]` => from block 1 to block 100 (subnode). In case its last subnode, set to-block to 0 to indicate newest block `[101, 0]`
+- `[10]` => last 10 recent blocks (for pruned node)
+- `[]` => for archive node
+
+Node on the top of the list has higher priority when selecting.
