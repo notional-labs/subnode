@@ -3,31 +3,45 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/notional-labs/subnode/config"
-	"github.com/notional-labs/subnode/state"
-	"github.com/notional-labs/subnode/utils"
+	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 )
 
 var ethWsServer *http.Server
 
-func ethWsHandle(w http.ResponseWriter, r *http.Request) {
-	prunedNode := state.SelectPrunedNode(config.ProtocolTypeEthWs)
-	selectedHost := prunedNode.Backend.Eth // default to pruned node
-
-	r.Host = r.URL.Host
-	state.ProxyMapEthWs[selectedHost].ServeHTTP(w, r)
-}
+//func ethWsHandle(w http.ResponseWriter, r *http.Request) {
+//	prunedNode := state.SelectPrunedNode(config.ProtocolTypeEthWs)
+//	selectedHost := prunedNode.Backend.Eth // default to pruned node
+//
+//	r.Host = r.URL.Host
+//	state.ProxyMapEthWs[selectedHost].ServeHTTP(w, r)
+//}
 
 func StartEthWsServer() {
 	fmt.Println("StartEthWsServer...")
+
+	var upgrader = websocket.Upgrader{} // use default options
+
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" { // URI over HTTP
-			ethWsHandle(w, r)
-		} else {
-			_ = utils.SendError(w)
+		c, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Print("upgrade:", err)
 			return
+		}
+		defer c.Close()
+		for {
+			mt, message, err := c.ReadMessage()
+			if err != nil {
+				log.Println("read:", err)
+				break
+			}
+			log.Printf("recv: %s", message)
+			err = c.WriteMessage(mt, message)
+			if err != nil {
+				log.Println("write:", err)
+				break
+			}
 		}
 	}
 
