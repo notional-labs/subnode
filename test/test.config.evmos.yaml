@@ -3,7 +3,7 @@ upstream:
     api: "http://api-evmos-ia.cosmosia.notional.ventures:80"
     grpc: "grpc-evmos-ia.cosmosia.notional.ventures:9090"
     eth: "http://jsonrpc-evmos-ia.cosmosia.notional.ventures:80"
-    ethws: "http://jsonrpc-evmos-ia.cosmosia.notional.ventures:80"
+    ethws: "ws://jsonrpc-evmos-ia.cosmosia.notional.ventures:80/websocket/"
     blocks: [362880]
   - rpc: "http://rpc-evmos-archive-sub-ia.cosmosia.notional.ventures:80"
     api: "http://api-evmos-archive-sub-ia.cosmosia.notional.ventures:80"
