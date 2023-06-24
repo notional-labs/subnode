@@ -6,10 +6,11 @@ import (
 )
 
 type Backend struct {
-	Rpc  string // url to rpc, eg., https://rpc-osmosis-ia.cosmosia.notional.ventures:443
-	Api  string // url to api, eg., https://api-osmosis-ia.cosmosia.notional.ventures:443
-	Grpc string // url to grpc, eg., grpc-osmosis-ia.cosmosia.notional.ventures:443
-	Eth  string // url to eth, eg., https://jsonrpc-evmos-ia.cosmosia.notional.ventures:443
+	Rpc   string // url to rpc, eg., https://rpc-osmosis-ia.cosmosia.notional.ventures:443
+	Api   string // url to api, eg., https://api-osmosis-ia.cosmosia.notional.ventures:443
+	Grpc  string // url to grpc, eg., grpc-osmosis-ia.cosmosia.notional.ventures:443
+	Eth   string // url to eth-http, eg., https://jsonrpc-evmos-ia.cosmosia.notional.ventures:443
+	EthWs string // url to eth-ws, eg., https://jsonrpc-evmos-ia.cosmosia.notional.ventures:443/websocket/
 
 	// examples:
 	// 	[1, 100] => from block 1 to block 100 (subnode)
@@ -33,10 +34,11 @@ const (
 type ProtocolType uint8
 
 const (
-	ProtocolTypeRpc  ProtocolType = 0
-	ProtocolTypeApi  ProtocolType = 1
-	ProtocolTypeGrpc ProtocolType = 2
-	ProtocolTypeEth  ProtocolType = 3
+	ProtocolTypeRpc   ProtocolType = 0
+	ProtocolTypeApi   ProtocolType = 1
+	ProtocolTypeGrpc  ProtocolType = 2
+	ProtocolTypeEth   ProtocolType = 3
+	ProtocolTypeEthWs ProtocolType = 4
 )
 
 var (

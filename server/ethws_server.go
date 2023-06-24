@@ -13,11 +13,11 @@ import (
 var ethWsServer *http.Server
 
 func ethWsHandle(w http.ResponseWriter, r *http.Request) {
-	prunedNode := state.SelectPrunedNode(config.ProtocolTypeEth)
+	prunedNode := state.SelectPrunedNode(config.ProtocolTypeEthWs)
 	selectedHost := prunedNode.Backend.Eth // default to pruned node
 
 	r.Host = r.URL.Host
-	state.ProxyMapEth[selectedHost].ServeHTTP(w, r)
+	state.ProxyMapEthWs[selectedHost].ServeHTTP(w, r)
 }
 
 func StartEthWsServer() {
