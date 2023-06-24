@@ -30,6 +30,15 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("body=%s\n", string(body))
 
+	//--------------------------------------------
+	// process batch request
+	if utils.IsBatch(body) {
+		aggerator.Eth_BathRequest(w, body)
+		return
+	}
+
+	//--------------------------------------------
+	// process normal request
 	var j0 interface{}
 	err = json.Unmarshal(body, &j0)
 	if err != nil {
