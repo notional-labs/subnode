@@ -22,13 +22,15 @@ type BackendState struct {
 }
 
 var (
-	PoolRpc     []*BackendState
-	PoolApi     []*BackendState
-	PoolGrpc    []*BackendState
-	PoolEth     []*BackendState
-	ProxyMapRpc = make(map[string]*httputil.ReverseProxy)
-	ProxyMapApi = make(map[string]*httputil.ReverseProxy)
-	ProxyMapEth = make(map[string]*httputil.ReverseProxy)
+	PoolRpc       []*BackendState
+	PoolApi       []*BackendState
+	PoolGrpc      []*BackendState
+	PoolEth       []*BackendState
+	PoolEthWs     []*BackendState
+	ProxyMapRpc   = make(map[string]*httputil.ReverseProxy)
+	ProxyMapApi   = make(map[string]*httputil.ReverseProxy)
+	ProxyMapEth   = make(map[string]*httputil.ReverseProxy)
+	ProxyMapEthWs = make(map[string]*httputil.ReverseProxy)
 )
 
 func Init() {
@@ -38,6 +40,7 @@ func Init() {
 		rpcItem := PoolRpc[i]
 		apiItem := PoolApi[i]
 		ethItem := PoolEth[i]
+		ethWsItem := PoolEthWs[i]
 
 		// rpc
 		targetRpc, err := url.Parse(rpcItem.Name)
@@ -59,13 +62,22 @@ func Init() {
 			panic(err)
 		}
 		ProxyMapEth[ethItem.Name] = httputil.NewSingleHostReverseProxy(targetEth)
+
+		// eth-ws
+		targetEthWs, err := url.Parse(ethWsItem.Name)
+		if err != nil {
+			panic(err)
+		}
+		ProxyMapEthWs[ethWsItem.Name] = httputil.NewSingleHostReverseProxy(targetEthWs)
 	}
 }
 
 func InitPool() {
-	PoolRpc = PoolRpc[:0] // Remove all elements
-	PoolApi = PoolApi[:0] // Remove all elements
-	PoolEth = PoolEth[:0] // Remove all elements
+	// Remove all elements
+	PoolRpc = PoolRpc[:0]
+	PoolApi = PoolApi[:0]
+	PoolEth = PoolEth[:0]
+	PoolEthWs = PoolEthWs[:0]
 
 	for _, s := range config.GetConfig().Upstream {
 		be := s // fix Copying the address of a loop variable in Go
@@ -108,6 +120,16 @@ func InitPool() {
 		}
 		fmt.Printf("debug: %+v\n", backendStateEth)
 		PoolEth = append(PoolEth, &backendStateEth)
+
+		//
+		backendStateEthWs := BackendState{
+			Name:      s.EthWs,
+			NodeType:  config.GetBackendNodeType(&be),
+			LastBlock: 0,
+			Backend:   &be,
+		}
+		fmt.Printf("debug: %+v\n", backendStateEthWs)
+		PoolEthWs = append(PoolEthWs, &backendStateEthWs)
 	}
 
 	TaskUpdateState()
@@ -134,6 +156,8 @@ func GetPool(t config.ProtocolType) []*BackendState {
 		return PoolGrpc
 	} else if t == config.ProtocolTypeEth {
 		return PoolEth
+	} else if t == config.ProtocolTypeEthWs {
+		return PoolEthWs
 	}
 
 	return nil
@@ -198,6 +222,7 @@ func doUpdateState() {
 		apiItem := PoolApi[i]
 		grpcItem := PoolGrpc[i]
 		ethItem := PoolEth[i]
+		ethWsItem := PoolEthWs[i]
 
 		if !IsNeededToFetchLastBlock(rpcItem) {
 			continue
@@ -213,6 +238,7 @@ func doUpdateState() {
 		apiItem.LastBlock = height
 		grpcItem.LastBlock = height
 		ethItem.LastBlock = height
+		ethWsItem.LastBlock = height
 	}
 }
 

@@ -8,6 +8,7 @@ func Start() {
 	StartApiServer()
 	StartGrpcServer()
 	StartEthServer()
+	StartEthWsServer()
 
 	select {}
 }
@@ -17,4 +18,5 @@ func Shutdown() {
 	ShutdownApiServer()
 	ShutdownGrpcServer()
 	ShutdownEthServer()
+	ShutdownEthWsServer()
 }
