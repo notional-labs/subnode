@@ -4,8 +4,40 @@ import (
 	"encoding/json"
 	"github.com/notional-labs/subnode/state"
 	"github.com/notional-labs/subnode/utils"
+	"log"
 	"net/http"
 )
+
+func Eth_BathRequest(w http.ResponseWriter, jsonBody []byte) {
+	log.Printf("Eth_BathRequest...")
+	var arr []json.RawMessage
+
+	err := json.Unmarshal(jsonBody, &arr)
+	if err != nil {
+		_ = utils.SendError(w)
+		return
+	}
+
+	var arrSize = len(arr)
+	var arrRes = make([]json.RawMessage, arrSize)
+
+	for i, s := range arr {
+		bodyChild, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", s)
+		if err != nil {
+			_ = utils.SendError(w)
+			return
+		}
+
+		arrRes[i] = bodyChild
+	}
+
+	jsonBytes, err := json.Marshal(arrRes)
+	if err != nil {
+		_ = utils.SendError(w)
+	}
+
+	_ = utils.SendResult(w, jsonBytes)
+}
 
 func Eth_getBlockTransactionCountByHash(w http.ResponseWriter, jsonBody []byte) {
 	for i, s := range state.PoolEth {

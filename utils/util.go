@@ -76,3 +76,16 @@ func SendResult(w http.ResponseWriter, body []byte) error {
 	_, err := w.Write(body)
 	return err
 }
+
+// copy from github.com/ethereum/go-ethereum/rpc/json.go
+// IsBatch returns true when the first non-whitespace characters is '['
+func IsBatch(raw []byte) bool {
+	for _, c := range raw {
+		// skip insignificant whitespace (http://www.ietf.org/rfc/rfc4627.txt)
+		if c == 0x20 || c == 0x09 || c == 0x0a || c == 0x0d {
+			continue
+		}
+		return c == '['
+	}
+	return false
+}

@@ -83,3 +83,21 @@ func (s *EthTestSuite) TestEth_getTransactionReceipt() {
 	v_result := gojsonq.New().FromString(string(body)).Find("result")
 	s.True(v_result != nil)
 }
+
+func (s *EthTestSuite) TestEth_BatchRequest() {
+	jsonText := []byte(`[{"jsonrpc":"2.0","method":"web3_clientVersion","params":[],"id":1},{"jsonrpc":"2.0","method":"net_version","params":[],"id":2}]`)
+	body, err := utils.FetchJsonRpcOverHttp(s.UrlEndpoint, jsonText)
+	s.NoError(err)
+
+	// [{"jsonrpc":"2.0","id":1,"result":"Version dev ()\nCompiled at  using Go go1.20.4 (amd64)"},{"jsonrpc":"2.0","id":2,"result":"9001"}]
+	s.T().Log("res=:", string(body))
+
+	jq := gojsonq.New().FromString(string(body))
+
+	v_r0 := jq.Find("[0].result")
+	s.True(v_r0 != nil)
+
+	jq.Reset()
+	v_r1 := jq.Find("[1].result")
+	s.True(v_r1 != nil)
+}
