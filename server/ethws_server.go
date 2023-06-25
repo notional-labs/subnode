@@ -136,7 +136,7 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 	var wg sync.WaitGroup
 	var wsConServer *websocket.Conn
 	var wsConClient *websocket.Conn
-	clientChannel := make(chan []byte) // struct{}
+	clientChannel := make(chan []byte)
 	serverChannel := make(chan []byte)
 
 	var err error
@@ -145,7 +145,8 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 		log.Print("upgrade err:", err)
 		return
 	}
-	defer wsConServer.Close()
+
+	defer closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
 
 	//---------------------------------
 	// ws-client
@@ -154,7 +155,6 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 		log.Print("error with createWSClient:", err)
 		return
 	}
-	defer wsConClient.Close()
 
 	wg.Add(1)
 	go wsClientConRelay(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
@@ -176,8 +176,6 @@ func StartEthWsServer() {
 		ethWsHandle(w, r)
 	}
 
-	// handle all requests to your server using the proxy
-	//http.HandleFunc("/", handler)
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/", handler)
 	go func() {
