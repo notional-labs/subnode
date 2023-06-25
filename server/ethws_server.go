@@ -32,6 +32,16 @@ func createWSClient() (*websocket.Conn, error) {
 	return c, nil
 }
 
+func IsClosed(ch <-chan []byte) bool {
+	select {
+	case <-ch:
+		return true
+	default:
+	}
+
+	return false
+}
+
 func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 	wsConServer, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -54,6 +64,17 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 	clientChannel := make(chan []byte) // struct{}
 	serverChannel := make(chan []byte)
 
+	closeAll := func() {
+		if !IsClosed(clientChannel) {
+			close(clientChannel)
+		}
+		if !IsClosed(serverChannel) {
+			close(serverChannel)
+		}
+		wsConServer.Close()
+		wsConClient.Close()
+	}
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -66,10 +87,13 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 			log.Println("relay to server")
 			err = wsConServer.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {
-				log.Println("relay to server:", err)
+				log.Println("relay to server err:", err)
+				closeAll()
 				break
 			}
 		}
+
+		log.Println("exit processing clientChannel")
 	}()
 
 	wg.Add(1)
@@ -84,10 +108,13 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 			log.Println("relay to client")
 			err = wsConClient.WriteMessage(websocket.TextMessage, msg)
 			if err != nil {
-				log.Println("relay to client:", err)
+				log.Println("relay to client err:", err)
+				closeAll()
 				break
 			}
 		}
+
+		log.Println("exit processing serverChannel")
 	}()
 
 	wg.Add(1)
@@ -97,12 +124,15 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 		for {
 			_, msg, err := wsConClient.ReadMessage()
 			if err != nil {
-				log.Println("ws-client read:", err)
+				log.Println("ws-client read err:", err)
+				closeAll()
 				break
 			}
 			log.Printf("ws-client recv: %s", msg)
 			clientChannel <- msg // send msg to clientChannel
 		}
+
+		log.Println("exit ws-client")
 	}()
 
 	wg.Add(1)
@@ -112,15 +142,19 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 		for {
 			_, msg, err := wsConServer.ReadMessage()
 			if err != nil {
-				log.Println("ws-server read:", err)
+				log.Println("ws-server read err:", err)
+				closeAll()
 				break
 			}
 			log.Printf("ws-server recv: %s", msg)
 			serverChannel <- msg // send msg to serverChannel
 		}
+
+		log.Println("exit ws-server")
 	}()
 
 	wg.Wait()
+	log.Printf("WaitGroup counter is zero")
 }
 
 func StartEthWsServer() {
