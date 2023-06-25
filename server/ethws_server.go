@@ -2,10 +2,12 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/notional-labs/subnode/config"
 	"github.com/notional-labs/subnode/state"
+	"github.com/notional-labs/subnode/utils"
 	"log"
 	"net/http"
 	"net/url"
@@ -126,6 +128,28 @@ func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 			break
 		}
 		log.Printf("ws-server recv: %s", msg)
+
+		var j0 interface{}
+		err = json.Unmarshal(msg, &j0)
+		if err == nil {
+			if m0, ok := j0.(map[string]interface{}); ok {
+				if method, ok := m0["method"].(string); ok {
+					fmt.Printf("method=%s, params=%+v\n", method, m0["params"])
+					if method != "eth_subscribe" && method != "eth_unsubscribe" {
+						res, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", msg)
+						if err != nil {
+							errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
+							_ = wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
+						}
+
+						_ = wsConServer.WriteMessage(websocket.TextMessage, res)
+
+						continue
+					}
+				}
+			}
+		}
+
 		serverChannel <- msg // send msg to serverChannel
 	}
 
