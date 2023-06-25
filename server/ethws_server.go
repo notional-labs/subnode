@@ -33,7 +33,7 @@ func createWSClient() (*websocket.Conn, error) {
 	return c, nil
 }
 
-func IsClosed(ch <-chan []byte) bool {
+func isClosed(ch <-chan []byte) bool {
 	select {
 	case <-ch:
 		return true
@@ -43,26 +43,101 @@ func IsClosed(ch <-chan []byte) bool {
 	return false
 }
 
+func closeAll(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte) {
+	if !isClosed(clientChannel) {
+		close(clientChannel)
+	}
+	if !isClosed(serverChannel) {
+		close(serverChannel)
+	}
+	if wsConServer != nil {
+		wsConServer.Close()
+	}
+	if wsConClient != nil {
+		wsConClient.Close()
+	}
+}
+
+func wsClientConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
+	defer wg.Done()
+	//defer close(clientChannel)
+
+	for {
+		msg := <-clientChannel // receive msg from clientChannel
+
+		// relay to server
+		log.Println("relay to server")
+		err := wsConServer.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			log.Println("relay to server err:", err)
+			closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
+			break
+		}
+	}
+
+	log.Println("exit processing clientChannel")
+}
+
+func wsServerConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
+	defer wg.Done()
+	//defer close(serverChannel)
+
+	for {
+		msg := <-serverChannel // receive msg from serverChannel
+
+		// relay to client
+		log.Println("relay to client")
+		err := wsConClient.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			log.Println("relay to client err:", err)
+			closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
+			break
+		}
+	}
+
+	log.Println("exit processing serverChannel")
+}
+
+func wsClientHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for {
+		_, msg, err := wsConClient.ReadMessage()
+		if err != nil {
+			log.Println("ws-client read err:", err)
+			closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
+			break
+		}
+		log.Printf("ws-client recv: %s", msg)
+		clientChannel <- msg // send msg to clientChannel
+	}
+
+	log.Println("exit ws-client")
+}
+
+func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for {
+		_, msg, err := wsConServer.ReadMessage()
+		if err != nil {
+			log.Println("ws-server read err:", err)
+			closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
+			break
+		}
+		log.Printf("ws-server recv: %s", msg)
+		serverChannel <- msg // send msg to serverChannel
+	}
+
+	log.Println("exit ws-server")
+}
+
 func ethWsHandle(w http.ResponseWriter, r *http.Request) {
+	var wg sync.WaitGroup
 	var wsConServer *websocket.Conn
 	var wsConClient *websocket.Conn
 	clientChannel := make(chan []byte) // struct{}
 	serverChannel := make(chan []byte)
-
-	closeAll := func() {
-		if !IsClosed(clientChannel) {
-			close(clientChannel)
-		}
-		if !IsClosed(serverChannel) {
-			close(serverChannel)
-		}
-		if wsConServer != nil {
-			wsConServer.Close()
-		}
-		if wsConClient != nil {
-			wsConClient.Close()
-		}
-	}
 
 	var err error
 	wsConServer, err = upgrader.Upgrade(w, r, nil)
@@ -71,8 +146,6 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer wsConServer.Close()
-
-	var wg sync.WaitGroup
 
 	//---------------------------------
 	// ws-client
@@ -84,82 +157,13 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 	defer wsConClient.Close()
 
 	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		//defer close(clientChannel)
-
-		for {
-			msg := <-clientChannel // receive msg from clientChannel
-
-			// relay to server
-			log.Println("relay to server")
-			err = wsConServer.WriteMessage(websocket.TextMessage, msg)
-			if err != nil {
-				log.Println("relay to server err:", err)
-				closeAll()
-				break
-			}
-		}
-
-		log.Println("exit processing clientChannel")
-	}()
-
+	go wsClientConRelay(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
 	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		//defer close(serverChannel)
-
-		for {
-			msg := <-serverChannel // receive msg from serverChannel
-
-			// relay to client
-			log.Println("relay to client")
-			err = wsConClient.WriteMessage(websocket.TextMessage, msg)
-			if err != nil {
-				log.Println("relay to client err:", err)
-				closeAll()
-				break
-			}
-		}
-
-		log.Println("exit processing serverChannel")
-	}()
-
+	go wsServerConRelay(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
 	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		for {
-			_, msg, err := wsConClient.ReadMessage()
-			if err != nil {
-				log.Println("ws-client read err:", err)
-				closeAll()
-				break
-			}
-			log.Printf("ws-client recv: %s", msg)
-			clientChannel <- msg // send msg to clientChannel
-		}
-
-		log.Println("exit ws-client")
-	}()
-
+	go wsClientHandle(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
 	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		for {
-			_, msg, err := wsConServer.ReadMessage()
-			if err != nil {
-				log.Println("ws-server read err:", err)
-				closeAll()
-				break
-			}
-			log.Printf("ws-server recv: %s", msg)
-			serverChannel <- msg // send msg to serverChannel
-		}
-
-		log.Println("exit ws-server")
-	}()
+	go wsServerHandle(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
 
 	wg.Wait()
 	log.Printf("WaitGroup counter is zero")
