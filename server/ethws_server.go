@@ -26,7 +26,7 @@ func createWSClient() (*websocket.Conn, error) {
 
 	c, _, err := websocket.DefaultDialer.Dial(targetEthWs.String(), nil)
 	if err != nil {
-		log.Printf("dial:", err)
+		log.Println("dial err:", err)
 		return nil, err
 	}
 
