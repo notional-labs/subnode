@@ -22,15 +22,14 @@ type BackendState struct {
 }
 
 var (
-	PoolRpc       []*BackendState
-	PoolApi       []*BackendState
-	PoolGrpc      []*BackendState
-	PoolEth       []*BackendState
-	PoolEthWs     []*BackendState
-	ProxyMapRpc   = make(map[string]*httputil.ReverseProxy)
-	ProxyMapApi   = make(map[string]*httputil.ReverseProxy)
-	ProxyMapEth   = make(map[string]*httputil.ReverseProxy)
-	ProxyMapEthWs = make(map[string]*httputil.ReverseProxy)
+	PoolRpc     []*BackendState
+	PoolApi     []*BackendState
+	PoolGrpc    []*BackendState
+	PoolEth     []*BackendState
+	PoolEthWs   []*BackendState
+	ProxyMapRpc = make(map[string]*httputil.ReverseProxy)
+	ProxyMapApi = make(map[string]*httputil.ReverseProxy)
+	ProxyMapEth = make(map[string]*httputil.ReverseProxy)
 )
 
 func Init() {
@@ -40,7 +39,6 @@ func Init() {
 		rpcItem := PoolRpc[i]
 		apiItem := PoolApi[i]
 		ethItem := PoolEth[i]
-		ethWsItem := PoolEthWs[i]
 
 		// rpc
 		targetRpc, err := url.Parse(rpcItem.Name)
@@ -62,13 +60,6 @@ func Init() {
 			panic(err)
 		}
 		ProxyMapEth[ethItem.Name] = httputil.NewSingleHostReverseProxy(targetEth)
-
-		// eth-ws
-		targetEthWs, err := url.Parse(ethWsItem.Name)
-		if err != nil {
-			panic(err)
-		}
-		ProxyMapEthWs[ethWsItem.Name] = httputil.NewSingleHostReverseProxy(targetEthWs)
 	}
 }
 
