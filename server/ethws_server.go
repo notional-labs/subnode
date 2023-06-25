@@ -26,7 +26,8 @@ func createWSClient() (*websocket.Conn, error) {
 
 	c, _, err := websocket.DefaultDialer.Dial(targetEthWs.String(), nil)
 	if err != nil {
-		log.Fatal("dial:", err)
+		log.Printf("dial:", err)
+		return nil, err
 	}
 
 	return c, nil
@@ -43,24 +44,8 @@ func IsClosed(ch <-chan []byte) bool {
 }
 
 func ethWsHandle(w http.ResponseWriter, r *http.Request) {
-	wsConServer, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Print("upgrade:", err)
-		return
-	}
-	defer wsConServer.Close()
-
-	var wg sync.WaitGroup
-
-	//---------------------------------
-	// ws-client
-	wsConClient, err := createWSClient()
-	if err != nil {
-		log.Print("error:", err)
-		return
-	}
-	defer wsConClient.Close()
-
+	var wsConServer *websocket.Conn
+	var wsConClient *websocket.Conn
 	clientChannel := make(chan []byte) // struct{}
 	serverChannel := make(chan []byte)
 
@@ -71,9 +56,32 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 		if !IsClosed(serverChannel) {
 			close(serverChannel)
 		}
-		wsConServer.Close()
-		wsConClient.Close()
+		if wsConServer != nil {
+			wsConServer.Close()
+		}
+		if wsConClient != nil {
+			wsConClient.Close()
+		}
 	}
+
+	var err error
+	wsConServer, err = upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Print("upgrade err:", err)
+		return
+	}
+	defer wsConServer.Close()
+
+	var wg sync.WaitGroup
+
+	//---------------------------------
+	// ws-client
+	wsConClient, err = createWSClient()
+	if err != nil {
+		log.Print("error with createWSClient:", err)
+		return
+	}
+	defer wsConClient.Close()
 
 	wg.Add(1)
 	go func() {
