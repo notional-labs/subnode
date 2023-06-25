@@ -129,31 +129,79 @@ func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 		}
 		log.Printf("ws-server recv: %s", msg)
 
-		var j0 interface{}
-		err = json.Unmarshal(msg, &j0)
-		if err == nil {
-			if m0, ok := j0.(map[string]interface{}); ok {
-				if method, ok := m0["method"].(string); ok {
-					fmt.Printf("method=%s, params=%+v\n", method, m0["params"])
-					if method != "eth_subscribe" && method != "eth_unsubscribe" {
-						res, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", msg)
-						if err != nil {
-							errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
-							_ = wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
-						}
+		//--------------------------------------------
+		// process batch request
+		if utils.IsBatch(msg) {
+			log.Printf("ethws: process batch request")
+			var arr []json.RawMessage
 
-						_ = wsConServer.WriteMessage(websocket.TextMessage, res)
-
-						continue
-					}
-				}
+			err := json.Unmarshal(msg, &arr)
+			if err != nil {
+				errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
+				_ = wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
+				continue
 			}
+
+			var arrSize = len(arr)
+			var arrRes = make([]json.RawMessage, arrSize)
+
+			for i, s := range arr {
+				bodyChild, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", s)
+				if err != nil {
+					errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
+					arrRes[i] = []byte(errMsg)
+					continue
+				}
+
+				arrRes[i] = bodyChild
+			}
+
+			jsonBytes, err := json.Marshal(arrRes)
+			if err != nil {
+				errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
+				_ = wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
+				continue
+			}
+
+			_ = wsConServer.WriteMessage(websocket.TextMessage, jsonBytes)
+
+			continue
 		}
 
-		serverChannel <- msg // send msg to serverChannel
+		//--------------------------------------------
+		// process single request
+		err = processSingleMsg(wsConServer, serverChannel, msg)
+		if err != nil {
+			errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
+			_ = wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
+		}
 	}
 
 	log.Println("exit ws-server")
+}
+
+func processSingleMsg(wsConServer *websocket.Conn, serverChannel chan []byte, msg []byte) error {
+	var j0 interface{}
+	err := json.Unmarshal(msg, &j0)
+	if err == nil {
+		if m0, ok := j0.(map[string]interface{}); ok {
+			if method, ok := m0["method"].(string); ok {
+				fmt.Printf("method=%s, params=%+v\n", method, m0["params"])
+				if method != "eth_subscribe" && method != "eth_unsubscribe" {
+					res, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", msg)
+					if err != nil {
+						return err
+					}
+
+					_ = wsConServer.WriteMessage(websocket.TextMessage, res)
+					return nil
+				}
+			}
+		}
+	}
+
+	serverChannel <- msg // send msg to serverChannel
+	return nil
 }
 
 func ethWsHandle(w http.ResponseWriter, r *http.Request) {

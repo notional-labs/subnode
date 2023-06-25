@@ -34,6 +34,7 @@ func Eth_BathRequest(w http.ResponseWriter, jsonBody []byte) {
 	jsonBytes, err := json.Marshal(arrRes)
 	if err != nil {
 		_ = utils.SendError(w)
+		return
 	}
 
 	_ = utils.SendResult(w, jsonBytes)
