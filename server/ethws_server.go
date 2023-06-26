@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/cometbft/cometbft/rpc/jsonrpc/types"
 	"github.com/gorilla/websocket"
 	"github.com/notional-labs/subnode/config"
 	"github.com/notional-labs/subnode/state"
@@ -33,31 +34,6 @@ func createWSClient() (*websocket.Conn, error) {
 	}
 
 	return c, nil
-}
-
-func isClosed(ch <-chan []byte) bool {
-	select {
-	case <-ch:
-		return true
-	default:
-	}
-
-	return false
-}
-
-func closeAll(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte) {
-	if !isClosed(clientChannel) {
-		close(clientChannel)
-	}
-	if !isClosed(serverChannel) {
-		close(serverChannel)
-	}
-	if wsConServer != nil {
-		wsConServer.Close()
-	}
-	if wsConClient != nil {
-		wsConClient.Close()
-	}
 }
 
 func wsClientConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
@@ -137,8 +113,7 @@ func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 
 			err := json.Unmarshal(msg, &arr)
 			if err != nil {
-				errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
-				_ = wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
+				_ = sendWsRpcResponseErr(wsConServer, err)
 				continue
 			}
 
@@ -148,8 +123,8 @@ func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 			for i, s := range arr {
 				bodyChild, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", s)
 				if err != nil {
-					errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
-					arrRes[i] = []byte(errMsg)
+					errMsg := getWsJsonRpcErr(s, err)
+					arrRes[i] = errMsg
 					continue
 				}
 
@@ -158,50 +133,27 @@ func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 
 			jsonBytes, err := json.Marshal(arrRes)
 			if err != nil {
-				errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
-				_ = wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
+				_ = sendWsRpcResponseErr(wsConServer, err)
 				continue
 			}
 
 			_ = wsConServer.WriteMessage(websocket.TextMessage, jsonBytes)
-
 			continue
 		}
 
 		//--------------------------------------------
 		// process single request
-		err = processSingleMsg(wsConServer, serverChannel, msg)
+		var rpcReq = types.RPCRequest{}
+		err = rpcReq.UnmarshalJSON(msg)
 		if err != nil {
-			errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":500,\"message\":\"%s\"},\"id\":null}", err)
-			_ = wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
+			_ = sendWsRpcResponseErr(wsConServer, err)
+			continue
 		}
+
+		processSingleMsg(wsConServer, serverChannel, &rpcReq, msg)
 	}
 
 	log.Println("exit ws-server")
-}
-
-func processSingleMsg(wsConServer *websocket.Conn, serverChannel chan []byte, msg []byte) error {
-	var j0 interface{}
-	err := json.Unmarshal(msg, &j0)
-	if err == nil {
-		if m0, ok := j0.(map[string]interface{}); ok {
-			if method, ok := m0["method"].(string); ok {
-				fmt.Printf("method=%s, params=%+v\n", method, m0["params"])
-				if method != "eth_subscribe" && method != "eth_unsubscribe" {
-					res, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", msg)
-					if err != nil {
-						return err
-					}
-
-					_ = wsConServer.WriteMessage(websocket.TextMessage, res)
-					return nil
-				}
-			}
-		}
-	}
-
-	serverChannel <- msg // send msg to serverChannel
-	return nil
 }
 
 func ethWsHandle(w http.ResponseWriter, r *http.Request) {
@@ -260,5 +212,67 @@ func StartEthWsServer() {
 func ShutdownEthWsServer() {
 	if err := ethWsServer.Shutdown(context.Background()); err != nil {
 		log.Printf("ethWsServer Shutdown: %v", err)
+	}
+}
+
+// ------------------
+// helper
+
+func getWsJsonRpcErr(jsonRawReq []byte, err error) []byte {
+	var rpcReq = types.RPCRequest{}
+	errJson := rpcReq.UnmarshalJSON(jsonRawReq)
+	if errJson != nil {
+		errMsg := "{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"invalid request\"},\"id\":null}"
+		return []byte(errMsg)
+	}
+
+	rpcRes := types.NewRPCErrorResponse(rpcReq.ID, 500, err.Error(), "")
+	jsonStrRes, _ := json.Marshal(rpcRes)
+	return jsonStrRes
+}
+
+func sendWsRpcResponseErr(wsConServer *websocket.Conn, err error) error {
+	errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"%s\"},\"id\":null}", err)
+	errWrite := wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
+	return errWrite
+}
+
+func processSingleMsg(wsConServer *websocket.Conn, serverChannel chan []byte, rpcReq *types.RPCRequest, jsonRaw []byte) {
+	if rpcReq.Method != "eth_subscribe" && rpcReq.Method != "eth_unsubscribe" {
+		res, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", jsonRaw)
+		if err != nil {
+			_ = sendWsRpcResponseErr(wsConServer, err)
+			return
+		}
+
+		_ = wsConServer.WriteMessage(websocket.TextMessage, res)
+		return
+	}
+
+	serverChannel <- jsonRaw // send msg to serverChannel
+}
+
+func isClosed(ch <-chan []byte) bool {
+	select {
+	case <-ch:
+		return true
+	default:
+	}
+
+	return false
+}
+
+func closeAll(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte) {
+	if !isClosed(clientChannel) {
+		close(clientChannel)
+	}
+	if !isClosed(serverChannel) {
+		close(serverChannel)
+	}
+	if wsConServer != nil {
+		wsConServer.Close()
+	}
+	if wsConClient != nil {
+		wsConClient.Close()
 	}
 }
