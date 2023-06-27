@@ -43,3 +43,6 @@ See sample config [test.config.evmos.yaml](test.config.evmos.yaml).
 - `[]` => for archive node
 
 Node on the top of the list has higher priority when selecting.
+
+### Note
+Please contact Notional to get a licence.
