@@ -9,10 +9,10 @@ import (
 
 // Chain is set at compile time `-X github.com/notional-labs/subnode/test.Chain=osmosis`
 // supported value: osmosis, evmos
-// default is osmosis
-var Chain = "osmosis"
+// default is evmos
+var Chain = "evmos"
 
-const SleepBeforeEachTest = 2 * time.Second
+const SleepBeforeEachTest = 3 * time.Second
 
 var isServerStarted = false
 
@@ -30,5 +30,7 @@ func startServer() {
 	}
 	//fmt.Printf("%+v\n", c)
 	config.SetConfig(c)
-	server.Start()
+
+	node := server.NewNode()
+	node.Start()
 }

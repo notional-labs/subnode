@@ -15,10 +15,18 @@ import (
 	"sync"
 )
 
-var ethWsServer *http.Server
 var upgrader = websocket.Upgrader{} // use default options
 
-func createWSClient() (*websocket.Conn, error) {
+type EthWsServer struct {
+	ethWsServer *http.Server
+}
+
+func NewEthWsServer() *EthWsServer {
+	newItem := &EthWsServer{}
+	return newItem
+}
+
+func (m *EthWsServer) createWSClient() (*websocket.Conn, error) {
 	prunedNode := state.SelectPrunedNode(config.ProtocolTypeEthWs)
 	selectedHost := prunedNode.Backend.EthWs // default to pruned node
 	targetEthWs, err := url.Parse(selectedHost)
@@ -36,7 +44,7 @@ func createWSClient() (*websocket.Conn, error) {
 	return c, nil
 }
 
-func wsClientConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
+func (m *EthWsServer) wsClientConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
 	defer wg.Done()
 	//defer close(clientChannel)
 
@@ -48,7 +56,7 @@ func wsClientConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, 
 		err := wsConServer.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			log.Println("relay to server err:", err)
-			closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
+			m.closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
 			break
 		}
 	}
@@ -56,7 +64,7 @@ func wsClientConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, 
 	log.Println("exit processing clientChannel")
 }
 
-func wsServerConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
+func (m *EthWsServer) wsServerConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
 	defer wg.Done()
 	//defer close(serverChannel)
 
@@ -68,7 +76,7 @@ func wsServerConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, 
 		err := wsConClient.WriteMessage(websocket.TextMessage, msg)
 		if err != nil {
 			log.Println("relay to client err:", err)
-			closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
+			m.closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
 			break
 		}
 	}
@@ -76,14 +84,14 @@ func wsServerConRelay(wsConServer *websocket.Conn, wsConClient *websocket.Conn, 
 	log.Println("exit processing serverChannel")
 }
 
-func wsClientHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
+func (m *EthWsServer) wsClientHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for {
 		_, msg, err := wsConClient.ReadMessage()
 		if err != nil {
 			log.Println("ws-client read err:", err)
-			closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
+			m.closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
 			break
 		}
 		log.Printf("ws-client recv: %s", msg)
@@ -93,14 +101,14 @@ func wsClientHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 	log.Println("exit ws-client")
 }
 
-func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
+func (m *EthWsServer) wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for {
 		_, msg, err := wsConServer.ReadMessage()
 		if err != nil {
 			log.Println("ws-server read err:", err)
-			closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
+			m.closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
 			break
 		}
 		log.Printf("ws-server recv: %s", msg)
@@ -113,7 +121,7 @@ func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 
 			err := json.Unmarshal(msg, &arr)
 			if err != nil {
-				_ = sendWsRpcResponseErr(wsConServer, err)
+				_ = m.sendWsRpcResponseErr(wsConServer, err)
 				continue
 			}
 
@@ -123,7 +131,7 @@ func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 			for i, s := range arr {
 				bodyChild, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", s)
 				if err != nil {
-					errMsg := getWsJsonRpcErr(s, err)
+					errMsg := m.getWsJsonRpcErr(s, err)
 					arrRes[i] = errMsg
 					continue
 				}
@@ -133,7 +141,7 @@ func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 
 			jsonBytes, err := json.Marshal(arrRes)
 			if err != nil {
-				_ = sendWsRpcResponseErr(wsConServer, err)
+				_ = m.sendWsRpcResponseErr(wsConServer, err)
 				continue
 			}
 
@@ -146,17 +154,17 @@ func wsServerHandle(wsConServer *websocket.Conn, wsConClient *websocket.Conn, cl
 		var rpcReq = types.RPCRequest{}
 		err = rpcReq.UnmarshalJSON(msg)
 		if err != nil {
-			_ = sendWsRpcResponseErr(wsConServer, err)
+			_ = m.sendWsRpcResponseErr(wsConServer, err)
 			continue
 		}
 
-		processSingleMsg(wsConServer, serverChannel, &rpcReq, msg)
+		m.processSingleMsg(wsConServer, serverChannel, &rpcReq, msg)
 	}
 
 	log.Println("exit ws-server")
 }
 
-func ethWsHandle(w http.ResponseWriter, r *http.Request) {
+func (m *EthWsServer) ethWsHandle(w http.ResponseWriter, r *http.Request) {
 	var wg sync.WaitGroup
 	var wsConServer *websocket.Conn
 	var wsConClient *websocket.Conn
@@ -170,47 +178,47 @@ func ethWsHandle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
+	defer m.closeAll(wsConServer, wsConClient, clientChannel, serverChannel)
 
 	//---------------------------------
 	// ws-client
-	wsConClient, err = createWSClient()
+	wsConClient, err = m.createWSClient()
 	if err != nil {
 		log.Print("error with createWSClient:", err)
 		return
 	}
 
 	wg.Add(1)
-	go wsClientConRelay(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
+	go m.wsClientConRelay(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
 	wg.Add(1)
-	go wsServerConRelay(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
+	go m.wsServerConRelay(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
 	wg.Add(1)
-	go wsClientHandle(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
+	go m.wsClientHandle(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
 	wg.Add(1)
-	go wsServerHandle(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
+	go m.wsServerHandle(wsConServer, wsConClient, clientChannel, serverChannel, &wg)
 
 	wg.Wait()
 	log.Printf("WaitGroup counter is zero")
 }
 
-func StartEthWsServer() {
+func (m *EthWsServer) StartEthWsServer() {
 	fmt.Println("StartEthWsServer...")
 
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		ethWsHandle(w, r)
+		m.ethWsHandle(w, r)
 	}
 
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/", handler)
 	go func() {
-		ethWsServer = &http.Server{Addr: ":8546", Handler: serverMux}
-		log.Fatal(ethWsServer.ListenAndServe())
+		m.ethWsServer = &http.Server{Addr: ":8546", Handler: serverMux}
+		log.Fatal(m.ethWsServer.ListenAndServe())
 
 	}()
 }
 
-func ShutdownEthWsServer() {
-	if err := ethWsServer.Shutdown(context.Background()); err != nil {
+func (m *EthWsServer) ShutdownEthWsServer() {
+	if err := m.ethWsServer.Shutdown(context.Background()); err != nil {
 		log.Printf("ethWsServer Shutdown: %v", err)
 	}
 }
@@ -218,7 +226,7 @@ func ShutdownEthWsServer() {
 // ------------------
 // helper
 
-func getWsJsonRpcErr(jsonRawReq []byte, err error) []byte {
+func (m *EthWsServer) getWsJsonRpcErr(jsonRawReq []byte, err error) []byte {
 	var rpcReq = types.RPCRequest{}
 	errJson := rpcReq.UnmarshalJSON(jsonRawReq)
 	if errJson != nil {
@@ -231,17 +239,17 @@ func getWsJsonRpcErr(jsonRawReq []byte, err error) []byte {
 	return jsonStrRes
 }
 
-func sendWsRpcResponseErr(wsConServer *websocket.Conn, err error) error {
+func (m *EthWsServer) sendWsRpcResponseErr(wsConServer *websocket.Conn, err error) error {
 	errMsg := fmt.Sprintf("{\"jsonrpc\":\"2.0\",\"error\":{\"code\":-32600,\"message\":\"%s\"},\"id\":null}", err)
 	errWrite := wsConServer.WriteMessage(websocket.TextMessage, []byte(errMsg))
 	return errWrite
 }
 
-func processSingleMsg(wsConServer *websocket.Conn, serverChannel chan []byte, rpcReq *types.RPCRequest, jsonRaw []byte) {
+func (m *EthWsServer) processSingleMsg(wsConServer *websocket.Conn, serverChannel chan []byte, rpcReq *types.RPCRequest, jsonRaw []byte) {
 	if rpcReq.Method != "eth_subscribe" && rpcReq.Method != "eth_unsubscribe" {
 		res, err := utils.FetchJsonRpcOverHttp("http://localhost:8545", jsonRaw)
 		if err != nil {
-			_ = sendWsRpcResponseErr(wsConServer, err)
+			_ = m.sendWsRpcResponseErr(wsConServer, err)
 			return
 		}
 
@@ -252,7 +260,7 @@ func processSingleMsg(wsConServer *websocket.Conn, serverChannel chan []byte, rp
 	serverChannel <- jsonRaw // send msg to serverChannel
 }
 
-func isClosed(ch <-chan []byte) bool {
+func (m *EthWsServer) isClosed(ch <-chan []byte) bool {
 	select {
 	case <-ch:
 		return true
@@ -262,11 +270,11 @@ func isClosed(ch <-chan []byte) bool {
 	return false
 }
 
-func closeAll(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte) {
-	if !isClosed(clientChannel) {
+func (m *EthWsServer) closeAll(wsConServer *websocket.Conn, wsConClient *websocket.Conn, clientChannel chan []byte, serverChannel chan []byte) {
+	if !m.isClosed(clientChannel) {
 		close(clientChannel)
 	}
-	if !isClosed(serverChannel) {
+	if !m.isClosed(serverChannel) {
 		close(serverChannel)
 	}
 	if wsConServer != nil {
