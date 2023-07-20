@@ -9,7 +9,12 @@ upstream:
     api: "http://api-evmos-archive-sub-ia.cosmosia.notional.ventures:80"
     grpc: "grpc-evmos-archive-sub-ia.cosmosia.notional.ventures:9090"
     eth: "http://jsonrpc-evmos-archive-sub-ia.cosmosia.notional.ventures:80"
-    blocks: [11030186,0]
+    blocks: [14583266,0]
+  - rpc: "http://rpc-evmos-archive-sub3-ia.cosmosia.notional.ventures:80"
+    api: "http://api-evmos-archive-sub3-ia.cosmosia.notional.ventures:80"
+    grpc: "grpc-evmos-archive-sub3-ia.cosmosia.notional.ventures:9090"
+    eth: "http://jsonrpc-evmos-archive-sub3-ia.cosmosia.notional.ventures:80"
+    blocks: [11030186,14583265]
   - rpc: "http://rpc-evmos-archive-sub2-ia.cosmosia.notional.ventures:80"
     api: "http://api-evmos-archive-sub2-ia.cosmosia.notional.ventures:80"
     grpc: "grpc-evmos-archive-sub2-ia.cosmosia.notional.ventures:9090"

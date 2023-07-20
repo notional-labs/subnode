@@ -11,10 +11,18 @@ import (
 	"strconv"
 )
 
-var apiServer *http.Server
+type ApiServer struct {
+	apiServer *http.Server
+}
 
-func StartApiServer() {
+func NewApiServer() *ApiServer {
+	newItem := &ApiServer{}
+	return newItem
+}
+
+func (m *ApiServer) StartApiServer() {
 	fmt.Println("StartApiServer...")
+
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		prunedNode := state.SelectPrunedNode(config.ProtocolTypeApi)
 
@@ -46,19 +54,17 @@ func StartApiServer() {
 		r.Host = r.URL.Host
 		state.ProxyMapApi[selectedHost].ServeHTTP(w, r)
 	}
-	// handle all requests to your server using the proxy
-	//http.HandleFunc("/", handler)
+
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/", handler)
 	go func() {
-		//log.Fatal(http.ListenAndServe(":1337", serverMux))
-		apiServer = &http.Server{Addr: ":1337", Handler: serverMux}
-		log.Fatal(apiServer.ListenAndServe())
+		m.apiServer = &http.Server{Addr: ":1337", Handler: serverMux}
+		log.Fatal(m.apiServer.ListenAndServe())
 	}()
 }
 
-func ShutdownApiServer() {
-	if err := apiServer.Shutdown(context.Background()); err != nil {
+func (m *ApiServer) ShutdownApiServer() {
+	if err := m.apiServer.Shutdown(context.Background()); err != nil {
 		log.Printf("apiServer Shutdown: %v", err)
 	}
 }

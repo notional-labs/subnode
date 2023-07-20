@@ -16,9 +16,16 @@ import (
 	"strings"
 )
 
-var ethServer *http.Server
+type EthServer struct {
+	ethServer *http.Server
+}
 
-func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
+func NewEthServer() *EthServer {
+	newItem := &EthServer{}
+	return newItem
+}
+
+func (m *EthServer) ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 	prunedNode := state.SelectPrunedNode(config.ProtocolTypeEth)
 	selectedHost := prunedNode.Backend.Eth // default to pruned node
 
@@ -74,7 +81,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 			//} else
 
 			if method == "eth_getBalance" {
-				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
+				height := m.getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -117,7 +124,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_getTransactionCount" {
-				height := getHeightFromEthJsonrpcParams(m0["params"], 3, 2, w)
+				height := m.getHeightFromEthJsonrpcParams(m0["params"], 3, 2, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -129,7 +136,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_getBlockTransactionCountByNumber" {
-				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
+				height := m.getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -141,7 +148,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_getCode" {
-				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
+				height := m.getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -153,7 +160,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_call" {
-				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
+				height := m.getHeightFromEthJsonrpcParams(m0["params"], 2, 1, w)
 
 				if height >= 0 {
 					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeEth)
@@ -165,7 +172,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_getBlockByNumber" {
-				height := getHeightFromEthJsonrpcParams(m0["params"], 2, 0, w)
+				height := m.getHeightFromEthJsonrpcParams(m0["params"], 2, 0, w)
 
 				fmt.Println("height=", height)
 
@@ -179,7 +186,7 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 					selectedHost = node.Backend.Eth
 				}
 			} else if method == "eth_getProof" {
-				height := getHeightFromEthJsonrpcParams(m0["params"], 3, 1, w)
+				height := m.getHeightFromEthJsonrpcParams(m0["params"], 3, 1, w)
 
 				fmt.Println("height=", height)
 
@@ -219,33 +226,32 @@ func ethJsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 	state.ProxyMapEth[selectedHost].ServeHTTP(w, r)
 }
 
-func StartEthServer() {
+func (m *EthServer) StartEthServer() {
 	fmt.Println("StartEthServer...")
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" { // JSONRPC over HTTP
-			ethJsonRpcOverHttp(w, r)
+			m.ethJsonRpcOverHttp(w, r)
 		} else {
 			_ = utils.SendError(w)
 			return
 		}
 	}
-	// handle all requests to your server using the proxy
-	//http.HandleFunc("/", handler)
+
 	serverMux := http.NewServeMux()
 	serverMux.HandleFunc("/", handler)
 	go func() {
-		ethServer = &http.Server{Addr: ":8545", Handler: serverMux}
-		log.Fatal(ethServer.ListenAndServe())
+		m.ethServer = &http.Server{Addr: ":8545", Handler: serverMux}
+		log.Fatal(m.ethServer.ListenAndServe())
 	}()
 }
 
-func ShutdownEthServer() {
-	if err := ethServer.Shutdown(context.Background()); err != nil {
+func (m *EthServer) ShutdownEthServer() {
+	if err := m.ethServer.Shutdown(context.Background()); err != nil {
 		log.Printf("ethServer Shutdown: %v", err)
 	}
 }
 
-func getHeightFromEthJsonrpcParams(params interface{}, paramsLen int, posHeight int, w http.ResponseWriter) (height int64) {
+func (m *EthServer) getHeightFromEthJsonrpcParams(params interface{}, paramsLen int, posHeight int, w http.ResponseWriter) (height int64) {
 	height = int64(-1)
 
 	positionalParams, ok := params.([]interface{})

@@ -16,9 +16,16 @@ import (
 	"strings"
 )
 
-var rpcServer *http.Server
+type RpcServer struct {
+	rpcServer *http.Server
+}
 
-func uriOverHttp(w http.ResponseWriter, r *http.Request) {
+func NewRpcServer() *RpcServer {
+	newItem := &RpcServer{}
+	return newItem
+}
+
+func (m *RpcServer) uriOverHttp(w http.ResponseWriter, r *http.Request) {
 	prunedNode := state.SelectPrunedNode(config.ProtocolTypeRpc)
 	selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
@@ -109,7 +116,7 @@ func uriOverHttp(w http.ResponseWriter, r *http.Request) {
 	state.ProxyMapRpc[selectedHost].ServeHTTP(w, r)
 }
 
-func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
+func (m *RpcServer) jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 	prunedNode := state.SelectPrunedNode(config.ProtocolTypeRpc)
 	selectedHost := prunedNode.Backend.Rpc // default to pruned node
 
@@ -289,15 +296,15 @@ func jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 	state.ProxyMapRpc[selectedHost].ServeHTTP(w, r)
 }
 
-func StartRpcServer() {
+func (m *RpcServer) StartRpcServer() {
 	fmt.Println("StartRpcServer...")
 	handler := func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" { // URI over HTTP
 			// see `/doc/rpc.md` and `https://github.com/tendermint/tendermint/blob/main/light/proxy/routes.go` to see the logic
-			uriOverHttp(w, r)
+			m.uriOverHttp(w, r)
 
 		} else if r.Method == "POST" { // JSONRPC over HTTP
-			jsonRpcOverHttp(w, r)
+			m.jsonRpcOverHttp(w, r)
 		} else {
 			_ = utils.SendError(w)
 			return
@@ -310,14 +317,14 @@ func StartRpcServer() {
 	serverMux.HandleFunc("/", handler)
 	go func() {
 		//log.Fatal(http.ListenAndServe(":26657", serverMux))
-		rpcServer = &http.Server{Addr: ":26657", Handler: serverMux}
-		log.Fatal(rpcServer.ListenAndServe())
+		m.rpcServer = &http.Server{Addr: ":26657", Handler: serverMux}
+		log.Fatal(m.rpcServer.ListenAndServe())
 
 	}()
 }
 
-func ShutdownRpcServer() {
-	if err := rpcServer.Shutdown(context.Background()); err != nil {
+func (m *RpcServer) ShutdownRpcServer() {
+	if err := m.rpcServer.Shutdown(context.Background()); err != nil {
 		log.Printf("rpcServer Shutdown: %v", err)
 	}
 }

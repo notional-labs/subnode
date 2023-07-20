@@ -18,10 +18,18 @@ import (
 	"strings"
 )
 
-var grpcServer *grpc.Server
+type GrpcServer struct {
+	grpcServer *grpc.Server
+}
 
-func StartGrpcServer() {
+func NewGrpcServer() *GrpcServer {
+	newItem := &GrpcServer{}
+	return newItem
+}
+
+func (m *GrpcServer) StartGrpcServer() {
 	fmt.Println("StartGrpcServer...")
+
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: false,
 	}
@@ -64,17 +72,17 @@ func StartGrpcServer() {
 		return nil, nil, status.Errorf(codes.Unimplemented, "Unknown method")
 	}
 
-	grpcServer := grpc.NewServer(grpc.UnknownServiceHandler(proxy.TransparentHandler(director)))
+	m.grpcServer = grpc.NewServer(grpc.UnknownServiceHandler(proxy.TransparentHandler(director)))
 	lis, err := net.Listen("tcp", ":9090")
 	if err != nil {
 		panic(err)
 	}
 
 	go func() {
-		_ = grpcServer.Serve(lis)
+		_ = m.grpcServer.Serve(lis)
 	}()
 }
 
-func ShutdownGrpcServer() {
-	grpcServer.GracefulStop()
+func (m *GrpcServer) ShutdownGrpcServer() {
+	m.grpcServer.GracefulStop()
 }
