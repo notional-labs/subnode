@@ -11,7 +11,8 @@ func startCmd() *cobra.Command {
 		Short: "start subnode server",
 		Args:  cobra.ExactArgs(0),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			server.Start()
+			node := server.NewNode()
+			node.Start()
 
 			return nil
 		},
