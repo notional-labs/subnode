@@ -16,7 +16,7 @@ As data is spreaded over multiple sub-nodes, its required to have a proxy which 
 #### Supported Protocols
 - [Tendermint RPC/JSONRPC](doc/rpc.md) on port 26657
 - Tendermint Websocket
-- LCD/API on port 1337
+- LCD/API on port 1317
 - GRPC on port 9090
 - [Eth JsonRpc](doc/ethereum-json-rpc.md) on port 8545
 - Eth JsonRpc Websocket on port 8546
