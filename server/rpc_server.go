@@ -127,6 +127,7 @@ func (m *RpcServer) jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("body=%s\n", string(body))
+	r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
 
 	var j0 interface{}
 	err = json.Unmarshal(body, &j0)
@@ -291,7 +292,6 @@ func (m *RpcServer) jsonRpcOverHttp(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	r.Body = io.NopCloser(bytes.NewBuffer(body)) // assign a new body with previous byte slice
 	r.Host = r.URL.Host
 	state.ProxyMapRpc[selectedHost].ServeHTTP(w, r)
 }
