@@ -8,7 +8,9 @@ import (
 	"github.com/notional-labs/subnode/utils"
 	"log"
 	"net/http"
+	"path"
 	"strconv"
+	"strings"
 )
 
 type ApiServer struct {
@@ -48,8 +50,33 @@ func (m *ApiServer) StartApiServer() {
 				}
 
 				selectedHost = node.Backend.Api
+			} else {
+				// /cosmos/base/tendermint/v1beta1/blocks/{height}
+				// /cosmos/base/tendermint/v1beta1/validatorsets/{height}
+
+				urlPath := r.URL.Path
+				//fmt.Printf("urlPath=%s\n", urlPath)
+
+				if strings.HasPrefix(urlPath, "/cosmos/base/tendermint/v1beta1/blocks/") ||
+					strings.HasPrefix(urlPath, "/cosmos/base/tendermint/v1beta1/validatorsets/") {
+					pHeight := path.Base(r.URL.Path)
+					fmt.Printf("pHeight=%s\n", pHeight)
+					height, err := strconv.ParseInt(pHeight, 10, 64)
+					if err != nil {
+						_ = utils.SendError(w)
+					}
+
+					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeApi)
+					if err != nil {
+						_ = utils.SendError(w)
+					}
+
+					selectedHost = node.Backend.Api
+				}
 			}
 		}
+
+		//fmt.Printf("selectedHost=%s\n", selectedHost)
 
 		r.Host = r.URL.Host
 		state.ProxyMapApi[selectedHost].ServeHTTP(w, r)
