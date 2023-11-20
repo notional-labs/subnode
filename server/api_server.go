@@ -42,11 +42,13 @@ func (m *ApiServer) StartApiServer() {
 				height, err := strconv.ParseInt(xCosmosBlockHeight, 10, 64)
 				if err != nil {
 					_ = utils.SendError(w)
+					return
 				}
 
 				node, err := state.SelectMatchedBackend(height, config.ProtocolTypeApi)
 				if err != nil {
 					_ = utils.SendError(w)
+					return
 				}
 
 				selectedHost = node.Backend.Api
@@ -61,17 +63,24 @@ func (m *ApiServer) StartApiServer() {
 					strings.HasPrefix(urlPath, "/cosmos/base/tendermint/v1beta1/validatorsets/") {
 					pHeight := path.Base(r.URL.Path)
 					fmt.Printf("pHeight=%s\n", pHeight)
-					height, err := strconv.ParseInt(pHeight, 10, 64)
-					if err != nil {
-						_ = utils.SendError(w)
-					}
 
-					node, err := state.SelectMatchedBackend(height, config.ProtocolTypeApi)
-					if err != nil {
-						_ = utils.SendError(w)
-					}
+					if pHeight == "latest" {
+						selectedHost = prunedNode.Backend.Api
+					} else {
+						height, err := strconv.ParseInt(pHeight, 10, 64)
+						if err != nil {
+							_ = utils.SendError(w)
+							return
+						}
 
-					selectedHost = node.Backend.Api
+						node, err := state.SelectMatchedBackend(height, config.ProtocolTypeApi)
+						if err != nil {
+							_ = utils.SendError(w)
+							return
+						}
+
+						selectedHost = node.Backend.Api
+					}
 				}
 			}
 		}
