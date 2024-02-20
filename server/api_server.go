@@ -55,12 +55,14 @@ func (m *ApiServer) StartApiServer() {
 			} else {
 				// /cosmos/base/tendermint/v1beta1/blocks/{height}
 				// /cosmos/base/tendermint/v1beta1/validatorsets/{height}
+				// /cosmos/tx/v1beta1/txs/block/{height}
 
 				urlPath := r.URL.Path
 				//fmt.Printf("urlPath=%s\n", urlPath)
 
 				if strings.HasPrefix(urlPath, "/cosmos/base/tendermint/v1beta1/blocks/") ||
-					strings.HasPrefix(urlPath, "/cosmos/base/tendermint/v1beta1/validatorsets/") {
+					strings.HasPrefix(urlPath, "/cosmos/base/tendermint/v1beta1/validatorsets/") ||
+					strings.HasPrefix(urlPath, "/cosmos/tx/v1beta1/txs/block/") {
 					pHeight := path.Base(r.URL.Path)
 					fmt.Printf("pHeight=%s\n", pHeight)
 
